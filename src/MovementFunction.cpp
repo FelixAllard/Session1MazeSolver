@@ -12,15 +12,11 @@
 #include <LibRobus.h>
 
 // ---------------- PID Structure ----------------
-struct PID {
-    float Kp;
-    float Ki;
-    float Kd;
-    float prevError;
-    float integral;
-};
 
-PID pid = {0.1f, 0.0f, 0.01f, 0.0f, 0.0f}; // <-- start with Kp only, tune later
+
+
+// Declare global PID (defined in .cpp)
+PID pid = {0.1f, 0.0f, 0.01f, 0.0f, 0.0f};
 
 float computePID(PID &pid, float error, float dt) {
     pid.integral += error * dt;

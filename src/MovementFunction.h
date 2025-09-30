@@ -16,7 +16,7 @@ struct PID {
     float prevError;
     float integral;
 };
-
+extern PID pid;
 // ---------------- Function Prototypes ----------------
 
 // Core movement
