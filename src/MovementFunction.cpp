@@ -15,7 +15,7 @@
 
 
 
-// Declare global PID (defined in .cpp)
+// Declare global PID
 PID pid = {0.1f, 0.0f, 0.01f, 0.0f, 0.0f};
 
 float computePID(PID &pid, float error, float dt) {

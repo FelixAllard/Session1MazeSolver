@@ -2,12 +2,11 @@
 #include <LibRobus.h>
 
 #include "MovementFunction.h"
+//MOTOR de gauche = 0
+//MOTOR de droite = 1
 void setup() {
     BoardInit();
-    MOTOR_SetSpeed(0, 0.1f);
-    delay(5000);
-    MOTOR_SetSpeed(0, 0);
-    //Advance(0.2f, 50);
+    Advance(0.2f, 50);
 
 
 }
