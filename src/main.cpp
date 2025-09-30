@@ -4,7 +4,10 @@
 #include "MovementFunction.h"
 void setup() {
     BoardInit();
-    Advance(0.5f, 50);
+    MOTOR_SetSpeed(0, 0.1f);
+    delay(5000);
+    MOTOR_SetSpeed(0, 0);
+    //Advance(0.2f, 50);
 
 
 }

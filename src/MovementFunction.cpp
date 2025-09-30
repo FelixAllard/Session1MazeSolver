@@ -79,11 +79,11 @@ void Advance(float baseSpeed = 0.5f, float wheelRotation = 5) {
 }
 
 void TurnLeft() {
-    // TODO: implement turn with encoders
+
 }
 
 void TurnRight() {
-    // TODO: implement turn with encoders
+
 }
 
 // ---------------- Simplicity Functions ----------------
@@ -99,7 +99,7 @@ void StartAdvancing(float speed) {
 }
 
 float GetRotationWheel(float pulse) {
-    return pulse / 3200.0f; // pulses -> rotations
+    return pulse / 3200.0f;
 }
 
 /*void Advance(float speed = 0.5f, float wheelRotation = 5) {
