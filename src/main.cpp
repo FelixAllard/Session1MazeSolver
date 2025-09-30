@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include <LibRobus.h>
+#include <CEntryPoint.h>
 void setup() {
-// write your initialization code here
+    SetupC();
 }
 
 void loop() {
-// write your code here
+    LoopC();
 }
