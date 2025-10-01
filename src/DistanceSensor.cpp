@@ -1,0 +1,31 @@
+//
+// Created by xilef on 10/1/2025.
+//
+
+#include "DistanceSensor.h"
+#include <Arduino.h>
+
+void SetupDistanceSensor() {
+    pinMode(redPin, INPUT);
+    pinMode(greenPin, INPUT);
+}
+bool GetRedSensor() {
+    bool red = !digitalRead(redPin);
+
+    return red;
+}
+bool GetGreenSensor() {
+    bool green = !digitalRead(greenPin);
+
+    return green;
+}
+bool GetBothSensor() {
+    bool red = !digitalRead(redPin);
+    bool green = !digitalRead(greenPin);
+    if (red && green) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}

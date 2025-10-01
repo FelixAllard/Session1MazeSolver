@@ -1,9 +1,9 @@
-//
+/*//
 // Created by joshg on 2025-10-01.
 #include <LibRobus.h>
 #include <Arduino.h>
 
-
+#include "FIndFindWall.h"
 const int Prox_G = 53;
 const int Prox_D = 49;
 bool WallD = FALSE;
@@ -20,7 +20,7 @@ void loop()
    findMur();
 }
 
-bool findMur(Prox_G,Prox_D)
+bool findMur()
 {
     WallD = digitalRead(Prox_D);
     WallG = digitalRead(Prox_G);
@@ -37,4 +37,4 @@ else
     return 0;
     }
 
-}
+}*/
