@@ -20,7 +20,7 @@ extern PID pid;
 // ---------------- Function Prototypes ----------------
 
 // Core movement
-void Advance(float baseSpeed = 0.5f, float wheelRotation = 5);
+void Advance(float baseSpeed = 0.3f, float wheelRotation = 15);
 void TurnLeft();
 void TurnRight();
 

@@ -6,7 +6,8 @@
 //MOTOR de droite = 1
 void setup() {
     BoardInit();
-    Advance(0.1f, 50);
+    delay(1000);
+    Advance(0.3f, 15);
 
 
 }

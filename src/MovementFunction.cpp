@@ -1,157 +1,201 @@
-//
-// Created by xilef on 9/30/2025.
-//
-
-#include "MovementFunction.h"
-#include <LibRobus.h>
-//
-// Created by xilef on 9/30/2025.
-//
-
 #include "MovementFunction.h"
 #include <LibRobus.h>
 
-// ---------------- PID Structure ----------------
+// ---------------- Structure PID simplifiée ----------------
+typedef struct {
+    float Kp, Ki, Kd;
+    float integral;
+    float prevError;
+} PID;
 
+// ---------------- Configuration PID ----------------
+PID pid = {0.8f, 0.1f, 0.05f, 0.0f, 0.0f};
 
+// ---------------- PID avec limites locales ----------------
+float computePID(float error, float dt) {
+    // Détection de valeurs aberrantes
+    if (fabs(error) > 1000) return 0;
 
-// Declare global PID
-PID pid = {0.1f, 0.0f, 0.01f, 0.0f, 0.0f};
+    // Limites locales
+    const float integralLimit = 50.0f;
+    const float outputLimit = 0.4f;
 
-float computePID(PID &pid, float error, float dt) {
+    // Terme proportionnel
+    float proportional = pid.Kp * error;
+
+    // Terme intégral avec anti-windup
     pid.integral += error * dt;
-    float derivative = (error - pid.prevError) / dt;
-    float output = pid.Kp * error + pid.Ki * pid.integral + pid.Kd * derivative;
+    if (pid.integral > integralLimit) pid.integral = integralLimit;
+    if (pid.integral < -integralLimit) pid.integral = -integralLimit;
+    float integral = pid.Ki * pid.integral;
+
+    // Terme dérivé
+    float derivative = pid.Kd * (error - pid.prevError) / dt;
     pid.prevError = error;
+
+    // Calcul de sortie avec saturation
+    float output = proportional + integral + derivative;
+    if (output > outputLimit) output = outputLimit;
+    if (output < -outputLimit) output = -outputLimit;
+
     return output;
 }
 
-// ---------------- Movement Functions ----------------
-
-void Advance(float baseSpeed = 0.5f, float wheelRotation = 5) {
-    float leftWheelPulse = 0, rightWheelPulse = 0;
+// ---------------- Fonction de mouvement améliorée ----------------
+void Advance(float targetDistance, float baseSpeed) {
+    // Sécurité vitesse
+    if (baseSpeed > 0.4f) baseSpeed = 0.4f;
+    if (baseSpeed < 0.1f) baseSpeed = 0.1f;
 
     ResetEncoders();
-    delay(100);
+    delay(50);
 
+    // Calcul du nombre de pulses cible
+    // À AJUSTER: remplace 0.1885 par la circonférence réelle de tes roues
+    float targetPulses = targetDistance * 3200.0f / 0.1885f;
+
+    float leftPulses = 0, rightPulses = 0;
     unsigned long lastTime = millis();
-    StartAdvancing(baseSpeed);
 
-    while (true) {
-        delay(50);  // control loop period (50 ms)
+    // Rampe d'accélération progressive
+    float currentSpeed = 0;
+    const float acceleration = 0.002f;
 
+    while (currentSpeed < baseSpeed) {
+        currentSpeed += acceleration;
+        MOTOR_SetSpeed(0, currentSpeed);
+        MOTOR_SetSpeed(1, currentSpeed);
+        delay(30);
+    }
+
+    // Phase de maintien avec PID
+    while (leftPulses < targetPulses || rightPulses < targetPulses) {
         unsigned long now = millis();
-        float dt = (now - lastTime) / 1000.0f; // seconds
+        float dt = (now - lastTime) / 1000.0f;
         lastTime = now;
 
-        // accumulate encoder pulses
-        leftWheelPulse  += ENCODER_ReadReset(0);
-        rightWheelPulse += ENCODER_ReadReset(1);
+        if (dt <= 0 || dt > 0.1f) {
+            dt = 0.01f; // Sécurité
+        }
 
-        // error = difference between wheels
-        float error = leftWheelPulse - rightWheelPulse;
+        // Lecture des encodeurs
+        float leftDelta = ENCODER_Read(0);
+        float rightDelta = ENCODER_Read(1);
 
-        // PID correction
-        float correction = computePID(pid, error, dt);
+        // Reset après lecture
+        ENCODER_ReadReset(0);
+        ENCODER_ReadReset(1);
 
-        // Apply correction
-        float leftMotorSpeed  = baseSpeed - correction;
-        float rightMotorSpeed = baseSpeed + correction;
+        // Filtrage des valeurs aberrantes
+        if (fabs(leftDelta) > 1000) leftDelta = 0;
+        if (fabs(rightDelta) > 1000) rightDelta = 0;
 
-        // clamp between -1 and 1
-        if (leftMotorSpeed > 1) leftMotorSpeed = 1;
-        if (leftMotorSpeed < -1) leftMotorSpeed = -1;
-        if (rightMotorSpeed > 1) rightMotorSpeed = 1;
-        if (rightMotorSpeed < -1) rightMotorSpeed = -1;
+        leftPulses += leftDelta;
+        rightPulses += rightDelta;
 
-        MOTOR_SetSpeed(0, leftMotorSpeed);
-        MOTOR_SetSpeed(1, rightMotorSpeed);
+        // Calcul de l'erreur
+        float error = leftPulses - rightPulses;
 
-        // stop condition
-        if (GetRotationWheel(leftWheelPulse) >= wheelRotation &&
-            GetRotationWheel(rightWheelPulse) >= wheelRotation) {
+        // Zone morte
+        if (fabs(error) < 5) error = 0;
+
+        // Calcul de correction PID
+        float correction = computePID(error, dt);
+
+        // Application des vitesses
+        float leftSpeed = currentSpeed - correction;
+        float rightSpeed = currentSpeed + correction;
+
+        // Saturation
+        if (leftSpeed > 0.6f) leftSpeed = 0.6f;
+        if (leftSpeed < -0.6f) leftSpeed = -0.6f;
+        if (rightSpeed > 0.6f) rightSpeed = 0.6f;
+        if (rightSpeed < -0.6f) rightSpeed = -0.6f;
+
+        MOTOR_SetSpeed(0, leftSpeed);
+        MOTOR_SetSpeed(1, rightSpeed);
+
+        // Condition de sortie
+        if (leftPulses >= targetPulses && rightPulses >= targetPulses) {
             break;
         }
+
+        delay(10);
+    }
+
+    // Arrêt progressif
+    const float deceleration = 0.005f;
+    while (currentSpeed > 0) {
+        currentSpeed -= deceleration;
+        if (currentSpeed < 0) currentSpeed = 0;
+        MOTOR_SetSpeed(0, currentSpeed);
+        MOTOR_SetSpeed(1, currentSpeed);
+        delay(20);
+    }
+
+    MOTOR_SetSpeed(0, 0);
+    MOTOR_SetSpeed(1, 0);
+
+    // Reset de l'intégrateur
+    pid.integral = 0;
+}
+
+// ---------------- Fonctions helper ----------------
+void ResetEncoders() {
+    ENCODER_Reset(0);
+    ENCODER_Reset(1);
+}
+
+void StartAdvancing(float speed) {
+    MOTOR_SetSpeed(0, speed);
+    MOTOR_SetSpeed(1, speed);
+}
+
+float GetRotationWheel(float pulse) {
+    return pulse / 3200.0f; // À ajuster selon ton robot
+}
+
+// ---------------- Fonctions de virage simplifiées ----------------
+void TurnLeft(float angleDegrees) {
+    ResetEncoders();
+
+    // À AJUSTER: calibration pour ton robot
+    float targetPulses = (angleDegrees / 90.0f) * 800.0f;
+
+    float leftPulses = 0, rightPulses = 0;
+
+    while (leftPulses > -targetPulses || rightPulses < targetPulses) {
+        leftPulses += ENCODER_ReadReset(0);
+        rightPulses += ENCODER_ReadReset(1);
+
+        MOTOR_SetSpeed(0, -0.3f);
+        MOTOR_SetSpeed(1, 0.3f);
+
+        delay(10);
     }
 
     MOTOR_SetSpeed(0, 0);
     MOTOR_SetSpeed(1, 0);
 }
 
-void TurnLeft() {
-
-}
-
-void TurnRight() {
-
-}
-
-// ---------------- Simplicity Functions ----------------
-
-void ResetEncoders() {
-    ENCODER_Reset(0);
-    ENCODER_Reset(1);
-}
-
-void StartAdvancing(float speed) {
-    MOTOR_SetSpeed(0, speed);
-    MOTOR_SetSpeed(1, speed);
-}
-
-float GetRotationWheel(float pulse) {
-    return pulse / 3200.0f;
-}
-
-/*void Advance(float speed = 0.5f, float wheelRotation = 5) {
-    float leftWheelPulse = 0, rightWheelPulse = 0;
-    float leftMotorSpeed = speed, rightMotorSpeed = speed;
+void TurnRight(float angleDegrees) {
     ResetEncoders();
-    delay(100);
-    StartAdvancing(speed);
-    {
-        delay(100);
-        leftWheelPulse += ENCODER_ReadReset(0);
-        rightWheelPulse += ENCODER_ReadReset(1);
-        if (leftWheelPulse > rightWheelPulse) {
-            leftMotorSpeed -= 0.01;
-            rightMotorSpeed += 0.01;
-            MOTOR_SetSpeed(0, leftMotorSpeed);
-            MOTOR_SetSpeed(1, rightMotorSpeed);
-        }
-        else if (leftWheelPulse < rightWheelPulse) {
-            leftMotorSpeed -= 0.01;
-            rightMotorSpeed += 0.01;
-            MOTOR_SetSpeed(0, leftMotorSpeed);
-            MOTOR_SetSpeed(1, rightMotorSpeed);
-        }
 
-    }while (GetRotationWheel(leftWheelPulse)>= wheelRotation && GetRotationWheel(rightWheelPulse) >= wheelRotation);
+    // À AJUSTER: calibration pour ton robot
+    float targetPulses = (angleDegrees / 90.0f) * 800.0f;
+
+    float leftPulses = 0, rightPulses = 0;
+
+    while (leftPulses < targetPulses || rightPulses > -targetPulses) {
+        leftPulses += ENCODER_ReadReset(0);
+        rightPulses += ENCODER_ReadReset(1);
+
+        MOTOR_SetSpeed(0, 0.3f);
+        MOTOR_SetSpeed(1, -0.3f);
+
+        delay(10);
+    }
+
+    MOTOR_SetSpeed(0, 0);
+    MOTOR_SetSpeed(1, 0);
 }
-
-
-
-
-
-void TurnLeft() {
-
-}
-void TurnRight() {
-
-}
-
-//--------------------------------------------------Simplicity Functions -----------------------------------------------
-
-
-void ResetEncoders() {
-    ENCODER_Reset(0);
-    ENCODER_Reset(1);
-}
-void StartAdvancing(float speed) {
-    MOTOR_SetSpeed(0, speed);
-    MOTOR_SetSpeed(1, speed);
-}
-
-float GetRotationWheel(float pulse) {
-    float wheelRotation = pulse/3200;
-    return wheelRotation;
-}*/
