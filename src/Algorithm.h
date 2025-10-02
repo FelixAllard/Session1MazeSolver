@@ -30,7 +30,7 @@ struct CurrentTile {
     bool backWall = false;
 };
 
-
+// cftdyrdcft
 void InitAlgorithm();
 
 ///Reset the current tile and should also modivy the struct depending on what the tape is like. ( Call CheckIfTape() function)
