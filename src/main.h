@@ -6,5 +6,4 @@
 #define SESSION1MAZESOLVER_MAIN_H
 
 
-bool CheckIfWallInFront(float x);
 #endif //SESSION1MAZESOLVER_MAIN_H
