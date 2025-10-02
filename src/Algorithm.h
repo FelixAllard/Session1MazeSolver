@@ -30,7 +30,7 @@ struct CurrentTile {
     bool backWall = false;
 };
 
-// cftdyrdcft
+
 void InitAlgorithm();
 
 
