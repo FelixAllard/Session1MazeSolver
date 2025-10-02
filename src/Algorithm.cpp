@@ -122,14 +122,27 @@ int GetNextMovement() {
         }
     }
 
-   if (current_tile.straightWall && current_tile.leftWall) {
-       if (facingDirection == 1) {
-           return 2 ;
-       }
-   }
+    if (current_tile.straightWall && current_tile.leftWall) {
+        if (facingDirection == 1) {
+            return 2 ;
+        }
+    }
 
     if (current_tile.straightWall && current_tile.rightWall) {
         if (facingDirection == 1) {
             return 0 ;
         }
     }
+
+    if (current_tile.straightWall && current_tile.leftWall) {
+        if (facingDirection == 0) {
+            return 2 ;
+        }
+    }
+
+    if (current_tile.straightWall && current_tile.rightWall) {
+        if (facingDirection == 2) {
+            return 0 ;
+        }
+    }
+}
