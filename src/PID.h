@@ -1,5 +1,5 @@
 //
-// Created by joshg on 2025-10-01.
+// Created by Felix on 2025-10-01.
 //
 
 #ifndef SESSION1MAZESOLVER_PID_H
@@ -8,7 +8,7 @@
 ///@brief Number of pulse per rotation
 const float PulsePerRotation = 3200;
 ///@brief Number ms for each sample
-const float SampleMs = 30.0;
+const float SampleMs = 300;
 ///@brief Number of Seconds per each sample
 const float SampleS = SampleMs / 1000.0;
 
@@ -17,6 +17,8 @@ const float PPR = 3200.0f;
 
 ///@brief Motor top speed
 const float maxRPS = 1.0f;
+
+extern long lastCountEncoder[2];
 
 /// @brief Discrete PID controller state and parameters
 /// @author Felix Allard
