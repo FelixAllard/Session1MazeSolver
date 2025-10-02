@@ -48,10 +48,6 @@ void CheckIfTape(){
         current_tile.backWall=false;}
 }
 
-int GetNextMovement() {
-
-
-}
 
 ///@brief Check if there is a wall in front and note it in the CurrentTile
 bool TestFrontWall() {
@@ -72,4 +68,15 @@ bool TestFrontWall() {
         return true ;
     }
     return false ;
+}
+
+
+int GetNextMovement() {
+    if (current_tile.straightWall==true;
+
+    current_tile.straightWall=true;
+    current_tile.rightWall=false;
+    current_tile.backWall=false;)}
+
+
 }
