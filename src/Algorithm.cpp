@@ -5,6 +5,18 @@
 #include "Algorithm.h"
 #include "DistanceSensor.h"
 
+void Advance() {
+
+
+
+
+
+
+}
+
+
+
+
 CurrentTile current_tile;
 
 void ResetCurrentTile() {
@@ -70,7 +82,6 @@ bool TestFrontWall() {
     return false ;
 }
 
-
 /**
  * @brief Choisit le prochain mouvement à effectuer.
  * Retourne :
@@ -86,34 +97,39 @@ int GetNextMovement() {
     // On verifie le mur devant soi
     if (!current_tile.straightWall) {
         if (facingDirection == 1) {
-            return 0 ;
+            return 1 ;
         }
     }
 
     // On verifie le mur a gauche
     if (!current_tile.leftWall) {
         if (facingDirection == 0) {
-            return 0 ;
+            return 1 ;
         }
     }
 
     // On verifie le mur a droite
     if (!current_tile.rightWall) {
         if (facingDirection == 2) {
-            return 0 ;
+            return 1 ;
         }
     }
 
     // On verifie le mur derriere soi
     if (!current_tile.backWall) {
         if (facingDirection == 3) {
-            return 0 ;
+            return 1 ;
         }
     }
-   if (current_tile.straightWall && current_tile.leftWall ) {
-       if (facingDirection == 0) {
+
+   if (current_tile.straightWall && current_tile.leftWall) {
+       if (facingDirection == 1) {
            return 2 ;
        }
    }
 
-}
+    if (current_tile.straightWall && current_tile.rightWall) {
+        if (facingDirection == 1) {
+            return 0 ;
+        }
+    }
