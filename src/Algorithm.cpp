@@ -48,7 +48,7 @@ void CheckIfTape(){
         current_tile.backWall=false;}
 }
 
-void GetNextMovement() {
+int GetNextMovement() {
 
 
 }
