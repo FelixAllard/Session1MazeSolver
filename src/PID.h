@@ -33,9 +33,11 @@ struct PID {
 
 extern PID pid;
 
-void Advance(float targetSpeed = 0.2f);
-void PID_Init(struct PID *_pid, float kp, float ki, float kd);
+/// @brief Functions
+void Advance(float targetSpeed);
+void PID_Init(PID* _pid, float kp, float ki, float kd);
 void PIDS_Init(float kp, float ki, float kd);
-void PID_ControlMotor(int motor, float setpoint, float dt);
-float computePID(PID &Pid, float error, float dt);
+float PID_Update(PID* Pid, float setpoint, float measured, float dt);
+void PID_ControlMotors(float targetSpeed);
+
 #endif //SESSION1MAZESOLVER_PID_H

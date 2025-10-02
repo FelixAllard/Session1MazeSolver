@@ -10,14 +10,14 @@
 ///@var Kp Control period
 ///@var
 
-struct PID motorPID[2];  // motorPID[0] for motor 0, motorPID[1] for motor 1
-
-long lastCountEncoder[2] = {0, 0};
-
+PID motorPID[2];               // PID for each motor
+long lastCountEncoder[2] = {0, 0}; // last encoder readings
 
 void Advance(float targetSpeed) {
+    // Initialize PID for both motors
+    PIDS_Init(0.2f, 0.05f, 0.01f);
 
-    PIDS_Init(0.2f, 0.1f, 0.01f);
+
 
     unsigned long lastUpdate = 0;
 
@@ -26,25 +26,49 @@ void Advance(float targetSpeed) {
         if (now - lastUpdate >= SampleMs) {
             lastUpdate = now;
 
-            PID_ControlMotor(0, targetSpeed, SampleS);
-            PID_ControlMotor(1, targetSpeed, SampleS);
+            PID_ControlMotors(targetSpeed);
         }
 
-        // other robot logic can run here while motors keep spinning
+        // other logic can run here without blocking
     }
-    /*// Initialize both motor PIDs
-    PIDS_Init(0.6f, 0.3f, 0.02f);
-
-    // Main PID loop
-    while (true) {
-        delay(SampleMs);
-
-        // Update both motors
-        PID_ControlMotor(0, targetSpeed, SampleS);
-        PID_ControlMotor(1, targetSpeed, SampleS);
-    }*/
 }
-float PID_Update(struct PID *Pid, float setpoint, float measured, float dt) {
+
+// Updates both motors: master is motor 0, slave is motor 1
+void PID_ControlMotors(float targetSpeed) {
+    // --- MASTER MOTOR (0) ---
+    long count0 = ENCODER_Read(0);
+    long diff0  = count0 - lastCountEncoder[0];
+    lastCountEncoder[0] = count0;
+
+    float rotations0 = (float)diff0 / PPR;
+    float measuredRPS0 = rotations0 / SampleS;
+    float measured0 = measuredRPS0 / maxRPS;
+    if (measured0 > 1.0f) measured0 = 1.0f;
+
+    float control0 = PID_Update(&motorPID[0], targetSpeed, measured0, SampleS);
+    if (control0 < 0.0f) control0 = 0.0f;
+    if (control0 > 1.0f) control0 = 1.0f;
+    MOTOR_SetSpeed(0, control0);
+
+    // --- SLAVE MOTOR (1) ---
+    long count1 = ENCODER_Read(1);
+    long diff1  = count1 - lastCountEncoder[1];
+    lastCountEncoder[1] = count1;
+
+    float rotations1 = (float)diff1 / PPR;
+    float measuredRPS1 = rotations1 / SampleS;
+    float measured1 = measuredRPS1 / maxRPS;
+    if (measured1 > 1.0f) measured1 = 1.0f;
+
+    // Slave setpoint = master's measured speed (synchronization)
+    float control1 = PID_Update(&motorPID[1], measuredRPS0, measuredRPS1, SampleS);
+    if (control1 < 0.0f) control1 = 0.0f;
+    if (control1 > 1.0f) control1 = 1.0f;
+    MOTOR_SetSpeed(1, control1);
+}
+
+// PID update function
+float PID_Update(PID* Pid, float setpoint, float measured, float dt) {
     float error = setpoint - measured;
 
     // Proportional
@@ -61,37 +85,21 @@ float PID_Update(struct PID *Pid, float setpoint, float measured, float dt) {
     Pid->lastError = error;
     Pid->lastDerivative = derivative;
 
-    // Output
     return P + I + D;
 }
-void PID_ControlMotor(int motor, float setpoint, float dt) {
-    long count = ENCODER_Read(motor);   // absolute count
-    long diff = count - lastCountEncoder[motor];
-    lastCountEncoder[motor] = count;
 
-    float rotations = (float)diff / PPR;
-    float measuredRPS = rotations / dt;
-    float measured = measuredRPS / maxRPS;
-    if (measured > 1.0f) measured = 1.0f;
-
-    float control = PID_Update(&motorPID[motor], setpoint, measured, dt);
-
-    if (control < 0.0f) control = 0.0f;
-    if (control > 1.0f) control = 1.0f;
-
-    MOTOR_SetSpeed(motor, control);
-}
-
-void PIDS_Init(float kp, float ki, float kd) {
-    PID_Init(&motorPID[0], kp, ki, kd);
-
-    PID_Init(&motorPID[1], kp, ki, kd);
-}
-void PID_Init(struct PID *_pid, float kp, float ki, float kd) {
+// Initialize one PID
+void PID_Init(PID* _pid, float kp, float ki, float kd) {
     _pid->kp = kp;
     _pid->ki = ki;
     _pid->kd = kd;
     _pid->integral = 0.0f;
     _pid->lastError = 0.0f;
     _pid->lastDerivative = 0.0f;
+}
+
+// Initialize both PIDs
+void PIDS_Init(float kp, float ki, float kd) {
+    PID_Init(&motorPID[0], kp, ki, kd);
+    PID_Init(&motorPID[1], kp, ki, kd);
 }
