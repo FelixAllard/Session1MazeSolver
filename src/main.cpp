@@ -1,17 +1,18 @@
 #include <Arduino.h>
 #include <LibRobus.h>
 #include <DistanceSensor.h>
+#include <PID.h>
 #include "main.h"
 //MOTOR de gauche = 0
 //MOTOR de droite = 1
 
 void setup() {
-    BoardInit();
-    SetupDistanceSensor();
-    Serial.begin(115200);
-
-
+    BoardInit(); // Init the board
+    SetupDistanceSensor(); // Setup the distance sensor
+    Serial.begin(115200);//Start Serial monitor display
     delay(1000);
+
+    Advance(0.5f);
 
     /*CheckIfWallInFront(0.25f);
     MOTOR_SetSpeed(0, 0.1f);

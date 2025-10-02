@@ -12,6 +12,12 @@ const float SampleMs = 30.0;
 ///@brief Number of Seconds per each sample
 const float SampleS = SampleMs / 1000.0;
 
+///@brief Number of pulse / rotation
+const float PPR = 3200.0f;
+
+///@brief Motor top speed
+const float maxRPS = 1.0f;
+
 /// @brief Discrete PID controller state and parameters
 /// @author Felix Allard
 struct PID {
@@ -25,9 +31,9 @@ struct PID {
 
 extern PID pid;
 
-void Advance();
-void PID_Init(struct PID *pid, float kp, float ki, float kd);
+void Advance(float targetSpeed = 0.2f);
+void PID_Init(struct PID *_pid, float kp, float ki, float kd);
 void PIDS_Init(float kp, float ki, float kd);
 void PID_ControlMotor(int motor, float setpoint, float dt);
-float computePID(PID &pid, float error, float dt);
+float computePID(PID &Pid, float error, float dt);
 #endif //SESSION1MAZESOLVER_PID_H

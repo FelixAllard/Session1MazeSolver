@@ -1,4 +1,3 @@
-/*
 //
 // Created by joshg on 2025-10-01.
 //
@@ -10,61 +9,44 @@
 
 ///@var Kp Control period
 ///@var
-typedef struct {
-    float Kp, Ki, Kd;
-    float integral;
-    float prevError;
-    float integralLimit;
-    float outputLimit;
-} PID;
+
 struct PID motorPID[2];  // motorPID[0] for motor 0, motorPID[1] for motor 1
 
 
 
 
-void Advance() {
-    //First, create PID and initialize
-    PID pid;
-    PID_Init(
-        pid,
-        0.6f,
-        0.3f,
-        0.02f
-    );
+void Advance(float targetSpeed) {
+    const int SampleMs = 20;                 // update every 20 ms
+    const float dt = SampleMs / 1000.0f;     // convert ms → seconds
 
-    //Now we start the PID Loop
+    // Initialize both motor PIDs
+    PIDS_Init(0.6f, 0.3f, 0.02f);
+
+    // Main PID loop
     while (true) {
         delay(SampleMs);
-        while (true) {
-            delay(SAMPLE_MS);
 
-            // Update motor 0
-            PID_ControlMotor(0, setpoint0, dt);
-
-            // Update motor 1
-            PID_ControlMotor(1, setpoint1, dt);
-        }
-
-
+        // Update both motors
+        PID_ControlMotor(0, targetSpeed, dt);
+        PID_ControlMotor(1, targetSpeed, dt);
     }
-
 }
-float PID_Update(struct PID *pid, float setpoint, float measured, float dt) {
+float PID_Update(struct PID *Pid, float setpoint, float measured, float dt) {
     float error = setpoint - measured;
 
     // Proportional
-    float P = pid->kp * error;
+    float P = Pid->kp * error;
 
     // Integral
-    pid->integral += error * dt;
-    float I = pid->ki * pid->integral;
+    Pid->integral += error * dt;
+    float I = Pid->ki * Pid->integral;
 
     // Derivative
-    float derivative = (error - pid->lastError) / dt;
-    float D = pid->kd * derivative;
+    float derivative = (error - Pid->lastError) / dt;
+    float D = Pid->kd * derivative;
 
-    pid->lastError = error;
-    pid->lastDerivative = derivative;
+    Pid->lastError = error;
+    Pid->lastDerivative = derivative;
 
     // Output
     return P + I + D;
@@ -92,12 +74,11 @@ void PIDS_Init(float kp, float ki, float kd) {
     PID_Init(&motorPID[0], kp, ki, 0.02f);
     PID_Init(&motorPID[1], kp, ki, 0.02f);
 }
-void PID_Init(struct PID *pid, float kp, float ki, float kd) {
-    pid->kp = kp;
-    pid->ki = ki;
-    pid->kd = kd;
-    pid->integral = 0.0f;
-    pid->lastError = 0.0f;
-    pid->lastDerivative = 0.0f;
+void PID_Init(struct PID *_pid, float kp, float ki, float kd) {
+    _pid->kp = kp;
+    _pid->ki = ki;
+    _pid->kd = kd;
+    _pid->integral = 0.0f;
+    _pid->lastError = 0.0f;
+    _pid->lastDerivative = 0.0f;
 }
-*/
