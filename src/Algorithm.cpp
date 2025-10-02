@@ -82,21 +82,38 @@ bool TestFrontWall() {
 
 int GetNextMovement() {
     // priorité : avancer > gauche > droite > demi-tour
+
+    // On verifie le mur devant soi
     if (!current_tile.straightWall) {
+        if (facingDirection == 1) {
+            return 0 ;
+        }
+    }
 
-        return 0; // continuer d'avancer
+    // On verifie le mur a gauche
+    if (!current_tile.leftWall) {
+        if (facingDirection == 0) {
+            return 0 ;
+        }
     }
-    else if (!current_tile.leftWall) {
-        return 1; // tourner vers la gauche
-    }
-    else if (!current_tile.rightWall) {
-        return 2; // tourner vers la droite
-    }
-    else {
-        return 3; // faire un demi-tour
-    }
-}
 
+    // On verifie le mur a droite
+    if (!current_tile.rightWall) {
+        if (facingDirection == 2) {
+            return 0 ;
+        }
+    }
 
+    // On verifie le mur derriere soi
+    if (!current_tile.backWall) {
+        if (facingDirection == 3) {
+            return 0 ;
+        }
+    }
+   if (current_tile.straightWall && current_tile.leftWall ) {
+       if (facingDirection == 0) {
+           return 2 ;
+       }
+   }
 
 }
