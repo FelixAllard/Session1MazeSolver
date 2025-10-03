@@ -151,5 +151,6 @@ int GetNextMovement() {
     //If looking toward left and wall in front, turn to right
 
     //If looking straight and wall in front, but wall neither left nor right, turn left ( or right, your choice )
+    // wall in front, left and right, turn to face backward (fastest way)
 
 }

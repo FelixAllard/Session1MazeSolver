@@ -10,7 +10,7 @@
 const float PPR = 3200.0f;
 
 /// @brief Sample period (ms) for control loop
-const float SampleMs = 300;
+const float SampleMs = 63;
 
 /// @brief Sample period (s) for control loop
 const float SampleS = SampleMs / 1000.0f;

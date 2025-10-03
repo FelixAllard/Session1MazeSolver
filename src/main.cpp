@@ -10,9 +10,11 @@ void setup() {
     BoardInit(); // Init the board
     SetupDistanceSensor(); // Setup the distance sensor
     Serial.begin(115200);//Start Serial monitor display
-    delay(1000);
+    delay(300);
+    ENCODER_Reset(0);
+    ENCODER_Reset(1);
 
-    Advance(1.0f);
+
 
     /*CheckIfWallInFront(0.25f);
     MOTOR_SetSpeed(0, 0.1f);
@@ -32,5 +34,6 @@ void loop() {
     Serial.print(GetBothSensor());
 
     Serial.print("\n");
-    delay(100);
+    Advance(3.0f);
+    delay(1000);
 }

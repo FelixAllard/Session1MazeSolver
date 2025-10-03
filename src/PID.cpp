@@ -11,6 +11,10 @@ PID motorPID[2];                   // PID controllers for each motor
 long lastCountEncoder[2] = {0, 0}; // last encoder readings
 long totalCountEncoder[2] = {0, 0}; // total encoder counts (for sync)
 
+
+static bool rampUp = true;
+
+
 // Helper clamp
 static inline float clampf(float v, float lo, float hi) {
     if (v < lo) return lo;
@@ -23,18 +27,44 @@ static const float SYNC_KP = 0.05f;      // sync correction gain (tune this)
 
 void Advance(float targetSpeed) {
     // Initialize both PIDs (tune these values)
-    PIDS_Init(0.2f, 0.05f, 0.01f);
+    PIDS_Init(0.30f, 0.04f, 0.03f);
     for (int i = 0; i < 2; i++) {
-        motorPID[i].integral = targetSpeed / motorPID[i].ki * 0.5f; // small prefill
+        motorPID[i].integral = 0.0f;//targetSpeed / motorPID[i].ki * 0.5f; // small prefill
     }
 
-
+    float currentSpeedRef = 0.0f;
     unsigned long lastUpdate = 0;
     while (true) {
         unsigned long now = millis();
+
         if (now - lastUpdate >= SampleMs) {
+
+            float accelStep = 0.1f; // small step for smooth acceleration/deceleration
+
+            if (rampUp) {
+                currentSpeedRef += accelStep;
+                if (currentSpeedRef >= targetSpeed) {
+                    currentSpeedRef = targetSpeed;
+                    rampUp = false; // switch to deceleration
+                }
+            } else {
+                currentSpeedRef -= accelStep*2;
+                if (currentSpeedRef <= 0.0f) {
+                    currentSpeedRef = 0.0f;
+                    rampUp = true; // switch to acceleration
+                    Serial.print("Reached Acceleration End" );
+                    MOTOR_SetSpeed(0,0.0f);
+                    MOTOR_SetSpeed(1,0.0f);
+                    return;
+
+                }
+            }
+
+
+
+
             lastUpdate = now;
-            PID_ControlMotors(targetSpeed);
+            PID_ControlMotors(currentSpeedRef);
         }
         // other logic can run here without blocking
     }
@@ -58,6 +88,10 @@ void PID_ControlMotors(float targetSpeed) {
         measured[i] = measuredRPS / maxRPS;
         measured[i] = clampf(measured[i], 0.0f, 1.0f);
     }
+
+
+
+
 
     // --- Left motor PID ---
     float control0 = PID_Update(&motorPID[0], targetSpeed, measured[0], SampleS);
