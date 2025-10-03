@@ -5,39 +5,42 @@
 #ifndef SESSION1MAZESOLVER_PID_H
 #define SESSION1MAZESOLVER_PID_H
 
-///@brief Number of pulse per rotation
-const float PulsePerRotation = 3200;
-///@brief Number ms for each sample
-const float SampleMs = 300;
-///@brief Number of Seconds per each sample
-const float SampleS = SampleMs / 1000.0;
 
-///@brief Number of pulse / rotation
+/// @brief Number of pulses per rotation (encoder resolution)
 const float PPR = 3200.0f;
 
-///@brief Motor top speed
+/// @brief Sample period (ms) for control loop
+const float SampleMs = 300;
+
+/// @brief Sample period (s) for control loop
+const float SampleS = SampleMs / 1000.0f;
+
+/// @brief Motor top speed (rotations per second, RPS)
 const float maxRPS = 1.0f;
 
+/// @brief Last encoder readings (global for both motors)
 extern long lastCountEncoder[2];
 
+/// @brief Accumulated encoder counts (for synchronization correction)
+extern long totalCountEncoder[2];
+
 /// @brief Discrete PID controller state and parameters
-/// @author Felix Allard
 struct PID {
-    float kp;             ///< Proportional gain: scales current error response
-    float ki;             ///< Integral gain: scales accumulated error over time
-    float kd;             ///< Derivative gain: scales rate of error change (damping)
-    float integral;       ///< Accumulated error sum (I-term memory, with clamping)
-    float lastError;      ///< Previous loop error (for derivative calculation)
-    float lastDerivative; ///< Previous derivative value (for smoothing/filtering)
+    float kp;             ///< Proportional gain
+    float ki;             ///< Integral gain
+    float kd;             ///< Derivative gain
+    float integral;       ///< Integral accumulator (with clamping)
+    float lastError;      ///< Previous loop error
+    float lastDerivative; ///< Previous derivative
 };
 
-extern PID pid;
+/// @brief Two PID controllers (one for each motor)
+extern PID motorPID[2];
 
 /// @brief Functions
-void Advance(float targetSpeed);
-void PID_Init(PID* _pid, float kp, float ki, float kd);
-void PIDS_Init(float kp, float ki, float kd);
-float PID_Update(PID* Pid, float setpoint, float measured, float dt);
+void Advance(float targetSpeed);                                   ///< Run main loop
+void PID_Init(PID* _pid, float kp, float ki, float kd);            ///< Init one PID
+void PIDS_Init(float kp, float ki, float kd);                      ///< Init both PIDs
+float PID_Update(PID* Pid, float setpoint, float measured, float dt); ///< Update one PID
 void PID_ControlMotors(float targetSpeed);
-
 #endif //SESSION1MAZESOLVER_PID_H

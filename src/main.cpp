@@ -12,7 +12,7 @@ void setup() {
     Serial.begin(115200);//Start Serial monitor display
     delay(1000);
 
-    Advance(0.5f);
+    Advance(1.0f);
 
     /*CheckIfWallInFront(0.25f);
     MOTOR_SetSpeed(0, 0.1f);
@@ -27,6 +27,7 @@ void setup() {
 }
 
 void loop() {
+
     Serial.print("Sonar 0 = " );
     Serial.print(GetBothSensor());
 

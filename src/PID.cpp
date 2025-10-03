@@ -1,73 +1,82 @@
 //
 // Created by Felix on 2025-10-01.
+// Rewritten PID control: two independent PIDs + sync correction
 //
 
 #include "PID.h"
-
 #include <Arduino.h>
 #include <LibRobus.h>
 
-///@var Kp Control period
-///@var
-
-PID motorPID[2];               // PID for each motor
+PID motorPID[2];                   // PID controllers for each motor
 long lastCountEncoder[2] = {0, 0}; // last encoder readings
+long totalCountEncoder[2] = {0, 0}; // total encoder counts (for sync)
+
+// Helper clamp
+static inline float clampf(float v, float lo, float hi) {
+    if (v < lo) return lo;
+    if (v > hi) return hi;
+    return v;
+}
+
+static const float INTEGRAL_MAX = 10.0f; // anti-windup limit
+static const float SYNC_KP = 0.05f;      // sync correction gain (tune this)
 
 void Advance(float targetSpeed) {
-    // Initialize PID for both motors
+    // Initialize both PIDs (tune these values)
     PIDS_Init(0.2f, 0.05f, 0.01f);
-
+    for (int i = 0; i < 2; i++) {
+        motorPID[i].integral = targetSpeed / motorPID[i].ki * 0.5f; // small prefill
+    }
 
 
     unsigned long lastUpdate = 0;
-
     while (true) {
         unsigned long now = millis();
         if (now - lastUpdate >= SampleMs) {
             lastUpdate = now;
-
             PID_ControlMotors(targetSpeed);
         }
-
         // other logic can run here without blocking
     }
 }
 
-// Updates both motors: master is motor 0, slave is motor 1
+// Updates both motors with PID + sync correction
 void PID_ControlMotors(float targetSpeed) {
-    // --- MASTER MOTOR (0) ---
-    long count0 = ENCODER_Read(0);
-    long diff0  = count0 - lastCountEncoder[0];
-    lastCountEncoder[0] = count0;
+    float measured[2];
+    long diff[2];
 
-    float rotations0 = (float)diff0 / PPR;
-    float measuredRPS0 = rotations0 / SampleS;
-    float measured0 = measuredRPS0 / maxRPS;
-    if (measured0 > 1.0f) measured0 = 1.0f;
+    // --- Read encoders and calculate normalized speed ---
+    for (int i = 0; i < 2; i++) {
+        long count = ENCODER_Read(i);
+        diff[i] = count - lastCountEncoder[i];
+        lastCountEncoder[i] = count;
 
-    float control0 = PID_Update(&motorPID[0], targetSpeed, measured0, SampleS);
-    if (control0 < 0.0f) control0 = 0.0f;
-    if (control0 > 1.0f) control0 = 1.0f;
+        totalCountEncoder[i] += diff[i]; // accumulate for possible future use
+
+        float rotations = (float)diff[i] / PPR;
+        float measuredRPS = rotations / SampleS;
+        measured[i] = measuredRPS / maxRPS;
+        measured[i] = clampf(measured[i], 0.0f, 1.0f);
+    }
+
+    // --- Left motor PID ---
+    float control0 = PID_Update(&motorPID[0], targetSpeed, measured[0], SampleS);
+    control0 = clampf(control0, 0.0f, 1.0f);
     MOTOR_SetSpeed(0, control0);
 
-    // --- SLAVE MOTOR (1) ---
-    long count1 = ENCODER_Read(1);
-    long diff1  = count1 - lastCountEncoder[1];
-    lastCountEncoder[1] = count1;
+    // --- Right motor PID + small sync correction ---
+    float control1 = PID_Update(&motorPID[1], targetSpeed, measured[1], SampleS);
 
-    float rotations1 = (float)diff1 / PPR;
-    float measuredRPS1 = rotations1 / SampleS;
-    float measured1 = measuredRPS1 / maxRPS;
-    if (measured1 > 1.0f) measured1 = 1.0f;
+    // Add small correction based on speed difference
+    float syncError = measured[0] - measured[1];
+    control1 += SYNC_KP * syncError;
 
-    // Slave setpoint = master's measured speed (synchronization)
-    float control1 = PID_Update(&motorPID[1], measuredRPS0, measuredRPS1, SampleS);
-    if (control1 < 0.0f) control1 = 0.0f;
-    if (control1 > 1.0f) control1 = 1.0f;
+    control1 = clampf(control1, 0.0f, 1.0f);
     MOTOR_SetSpeed(1, control1);
 }
 
-// PID update function
+
+// PID update function (with anti-windup clamp)
 float PID_Update(PID* Pid, float setpoint, float measured, float dt) {
     float error = setpoint - measured;
 
@@ -76,12 +85,18 @@ float PID_Update(PID* Pid, float setpoint, float measured, float dt) {
 
     // Integral
     Pid->integral += error * dt;
+    if (Pid->integral > INTEGRAL_MAX) Pid->integral = INTEGRAL_MAX;
+    if (Pid->integral < -INTEGRAL_MAX) Pid->integral = -INTEGRAL_MAX;
     float I = Pid->ki * Pid->integral;
 
     // Derivative
-    float derivative = (error - Pid->lastError) / dt;
+    float derivative = 0.0f;
+    if (dt > 0.0f) {
+        derivative = (error - Pid->lastError) / dt;
+    }
     float D = Pid->kd * derivative;
 
+    // Save state
     Pid->lastError = error;
     Pid->lastDerivative = derivative;
 
@@ -103,3 +118,4 @@ void PIDS_Init(float kp, float ki, float kd) {
     PID_Init(&motorPID[0], kp, ki, kd);
     PID_Init(&motorPID[1], kp, ki, kd);
 }
+

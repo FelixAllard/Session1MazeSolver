@@ -145,6 +145,7 @@ int GetNextMovement() {
             return 0 ;
         }
     }
+    return 1;
     //If looking toward right and wall in front, turn to left
 
     //If looking toward left and wall in front, turn to right
