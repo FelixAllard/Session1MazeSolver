@@ -146,7 +146,7 @@ int GetNextMovement() {
     // wall in front, left and right, turn to face backward (fastest way)
 
 }
-
+//Je melange srm le return de GetNextMovement (changement de direction ou mouvement)
 void Advance() {
     if (GetNextMovement() == 0)
         positionX--;
@@ -154,8 +154,8 @@ void Advance() {
         positionY++;
     if (GetNextMovement() == 2)
         positionX++;
-    if (GetNextMovement() == 3)
-        positionY--;
+//    if (GetNextMovement() == 3)
+//       positionY--;
 
 
 }
@@ -167,6 +167,7 @@ void Sequence() {
         CheckIfTape();
         TestFrontWall();
         GetNextMovement();
+        Advance();
     }
 }
 
