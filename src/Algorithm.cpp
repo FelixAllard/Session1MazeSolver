@@ -154,3 +154,16 @@ int GetNextMovement() {
     // wall in front, left and right, turn to face backward (fastest way)
 
 }
+
+
+void Sequence() {
+    while (positionY < 9){
+        ResetCurrentTile();
+        CheckIfTape();
+        TestFrontWall();
+        GetNextMovement();
+    }
+}
+
+
+
