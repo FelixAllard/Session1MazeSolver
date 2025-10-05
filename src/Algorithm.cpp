@@ -148,9 +148,14 @@ int GetNextMovement() {
 }
 //Je melange srm le return de GetNextMovement (changement de direction ou mouvement)
 void Advance() {
-    if (GetNextMovement() == 0)
+    int nextMovement = GetNextMovement();
+
+    // Si nextMovement = 0 ou 2, danse cas change facing direction
+    // Si next movement = 1, change la case d/pendament du facing direction
+
+    if (nextMovement == 0)
         positionX--;
-    if (GetNextMovement() == 1)
+    if (nextMovement == 1)
         positionY++;
     if (GetNextMovement() == 2)
         positionX++;
