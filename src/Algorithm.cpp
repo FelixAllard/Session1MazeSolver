@@ -5,14 +5,6 @@
 #include "Algorithm.h"
 #include "DistanceSensor.h"
 
-void Advance() {
-
-
-
-
-
-
-}
 
 
 
@@ -152,6 +144,19 @@ int GetNextMovement() {
 
     //If looking straight and wall in front, but wall neither left nor right, turn left ( or right, your choice )
     // wall in front, left and right, turn to face backward (fastest way)
+
+}
+
+void Advance() {
+    if (GetNextMovement() == 0)
+        positionX--;
+    if (GetNextMovement() == 1)
+        positionY++;
+    if (GetNextMovement() == 2)
+        positionX++;
+    if (GetNextMovement() == 3)
+        positionY--;
+
 
 }
 
