@@ -33,63 +33,120 @@ static inline float clampf(float v, float lo, float hi) {
 static const float INTEGRAL_MAX = 10.0f; // anti-windup limit
 
 
-void Advance(float targetSpeed = 1.0f) {
-    // Initialize both PIDs (tune these values)
-    PIDS_Init(0.30f, 0.04f, 0.03f);
-
+void ResetPIDState() {
     for (int i = 0; i < 2; i++) {
-        motorPID[i].integral = 0.0f;//targetSpeed / motorPID[i].ki * 0.5f; // small prefill
+        motorPID[i].integral = 0.0f;
+        motorPID[i].lastError = 0.0f;
+        motorPID[i].lastDerivative = 0.0f;
+    }
+}
+
+void Advance(float motorFraction) {
+    // motorFraction is now 0–1 (0 = stopped, 1 = full speed)
+    motorFraction = clampf(motorFraction, 0.0f, 1.0f);
+
+    // Initialize both PIDs
+    PIDS_Init(0.3f, 0.04f, 0.03f);
+
+    // Reset integrals
+    for (int i = 0; i < 2; i++) {
+        motorPID[i].integral = 0.0f;
     }
 
-    float currentSpeedRef = 0.0f;
+    float currentSpeedRef = 0.0f; // ramping variable
     unsigned long lastUpdate = 0;
+    const float accelStep = 0.02f; // fraction per loop
+
     while (true) {
         unsigned long now = millis();
-
         if (now - lastUpdate >= SampleMs) {
 
-            float accelStep = 0.1f; // small step for smooth acceleration/deceleration
-
+            // --- Ramp up / down ---
             if (rampUp) {
                 currentSpeedRef += accelStep;
-                if (currentSpeedRef >= targetSpeed) {
-                    currentSpeedRef = targetSpeed;
+                if (currentSpeedRef >= motorFraction) {
+                    currentSpeedRef = motorFraction;
                     rampUp = false; // start deceleration next
                 }
-            }
-            else {
-
+            } else {
                 currentSpeedRef -= accelStep;
                 if (currentSpeedRef <= 0.0f) {
                     currentSpeedRef = 0.0f;
-                    rampUp = true; // ready for next run
+                    rampUp = true;
 
-                    // --- Smooth PID restart handling ---
-                    // Don't reset encoder totals (we want straight-line continuity)
-                    // Just damp PID state to prevent bursts next cycle
+                    // Smooth PID damping
                     for (int i = 0; i < 2; i++) {
-                        motorPID[i].integral *= 0.5f;     // decay accumulated error
+                        motorPID[i].integral *= 0.5f;
                         motorPID[i].lastError *= 0.5f;
                         motorPID[i].lastDerivative = 0.0f;
                     }
 
-                    Serial.println("Reached Acceleration End");
-
                     MOTOR_SetSpeed(0, 0.0f);
                     MOTOR_SetSpeed(1, 0.0f);
-
-                    break;  // exit loop instead of return
+                    Serial.println("Reached Acceleration End");
+                    break;
                 }
-
             }
 
-
             lastUpdate = now;
+
+            // --- Update motors with fraction directly ---
             PID_ControlMotors(currentSpeedRef);
         }
-        // other logic can run here without blocking
     }
 }
+
+// Moves the robot a specific distance in meters
+// fractionSpeed: 0.0–1.0 (normalized motor speed fraction)
+void AdvanceDistance(float distanceMeters, float fractionSpeed) {
+    // Convert distance to encoder pulses
+    const float wheelRadius = 0.0385f;
+    long targetPulses = (long)((distanceMeters / (2.0f * 3.14159f * wheelRadius)) * PPR);
+
+    // Reset encoders
+    ENCODER_Reset(0);
+    ENCODER_Reset(1);
+    lastCountEncoder[0] = 0;
+    lastCountEncoder[1] = 0;
+    totalCountEncoder[0] = 0;
+    totalCountEncoder[1] = 0;
+
+    ResetPIDState();
+    PIDS_Init(0.25f, 0.05f, 0.03f); // PID tuning
+    motorPID[0].integral = 0.0f;
+    motorPID[1].integral = 0.0f;
+
+    float currentSpeedRef = 0.0f;
+    const float accelStep = 0.05f;
+    unsigned long lastUpdate = millis();
+
+    while (true) {
+        unsigned long now = millis();
+        if (now - lastUpdate >= SampleMs) {
+            lastUpdate = now;
+
+            // Ramp up to target fraction
+            if (currentSpeedRef < fractionSpeed) {
+                currentSpeedRef += accelStep;
+                if (currentSpeedRef > fractionSpeed) currentSpeedRef = fractionSpeed;
+            }
+
+            // PID + sync
+            PID_ControlMotors(currentSpeedRef);
+
+            // Check distance
+            long avgPulses = (totalCountEncoder[0] + totalCountEncoder[1]) / 2;
+            if (avgPulses >= targetPulses) break;
+        }
+    }
+
+    // Smooth stop
+    MOTOR_SetSpeed(0, 0.0f);
+    MOTOR_SetSpeed(1, 0.0f);
+}
+
+
+
 
 // Updates both motors with PID + sync correction
 void PID_ControlMotors(float targetSpeed) {
@@ -181,5 +238,3 @@ void PIDS_Init(float kp, float ki, float kd) {
     PID_Init(&motorPID[0], kp, ki, kd, 0);
     PID_Init(&motorPID[1], kp, ki, kd, 1);
 }
-
-

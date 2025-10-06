@@ -4,6 +4,7 @@
 #include <PID.h>
 #include "main.h"
 #include "Whistle.h"
+#include "Algorithm.h"
 //MOTOR de gauche = 0
 //MOTOR de droite = 1
 
@@ -28,8 +29,9 @@ void setup() {
 ///@author Felix
 void loop() {
     Serial.println("Hello World");
-    PrintToString();
-    TurnRight();
+    /*PrintToString();
+    TurnLeft();*/
+    AdvanceDistance(0.45f, 1.0f);
     delay(1000);
 
     /*Serial.println("ran");
@@ -38,7 +40,7 @@ void loop() {
 
 
 
-    /* if(positionY != 9) {
-             Logic();
-         }*/
+    if(positionY != 9) {
+        Logic();
+    }
 }

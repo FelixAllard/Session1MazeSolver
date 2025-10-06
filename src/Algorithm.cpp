@@ -181,7 +181,7 @@ void Logic() {
         }
         //Avance, the return ends the function.
         if (nextMovement == 1) {
-            Advance();
+            AdvanceDistance(0.45f, 1.0f);
             if (facingDirection == 0) {
                 positionX--;
             }

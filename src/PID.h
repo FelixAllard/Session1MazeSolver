@@ -49,6 +49,7 @@ extern PID motorPID[2];
 /// @brief Function that advances exactly 0.5m
 /// @author Felix
 void Advance(float targetSpeed = 1.0f);                                   ///< Run main loop
+void AdvanceDistance(float distanceMeters, float fractionSpeed = 1.0f);
 
 /*///@brief function that turns 90 degrees left
 ///@exception NotImplemented
