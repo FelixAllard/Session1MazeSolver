@@ -171,7 +171,7 @@ void PID_Init(PID* _pid, float kp, float ki, float kd, int motorIndex) {
     if (!pidStateInitialized[motorIndex]) {
         _pid->integral = 0.0f;
         _pid->lastError = 0.0f;
-        _pid->lastDerivative = 0.0f;
+        _pid->lastDerivati  ve = 0.0f;
         pidStateInitialized[motorIndex] = true;
     }
 }

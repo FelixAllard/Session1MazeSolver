@@ -7,9 +7,17 @@
 #include "LibRobus.h"
 #include "PID.h"
 
-#define TURN_KP 0.004f
-#define TURN_KI 0.0001f
-#define TURN_KD 0.0005f
+
+
+#define TURN_KP 0.02f
+#define TURN_KI 0.0005f
+#define TURN_KD 0.001f
+
+#define STOP_THRESHOLD 50   // pulses tolerance to stop
+#define ENCODER_PPR 3200.0f
+#define WHEEL_DIAMETER 8.0f  // cm
+#define WHEELBASE 16.0f      // cm
+#define SAMPLE_MS 10          // PID update interval in milliseconds
 
 static inline float clampf(float v, float lo, float hi) {
     if (v < lo) return lo;
@@ -17,65 +25,72 @@ static inline float clampf(float v, float lo, float hi) {
     return v;
 }
 
+float ffabs(float x) {
+    if (x < 0.0f) {
+        return -x;
+    } else {
+        return x;
+    }
+}
 void Turn90(bool turnRight = true) {
-    // Initialize both PIDs (separate from forward PIDs)
+    // Initialize separate PIDs for left and right
     PIDS_Init(TURN_KP, TURN_KI, TURN_KD);
 
     long startLeft  = ENCODER_Read(0);
     long startRight = ENCODER_Read(1);
 
-    // Calculate target encoder difference for 90 degrees
-    const float wheelDiameter = 8.0f; // cm
-    const float wheelbase = 16.0f;    // cm (adjust for your robot)
-    const float wheelCircumference = M_PI * wheelDiameter;
-    const float turnDistance = (M_PI * wheelbase) / 4.0f; // quarter turn
-    const float rotationsNeeded = turnDistance / wheelCircumference;
-    const float pulsesTarget = rotationsNeeded * 3200.0f;
+    // Calculate pulses needed for 90° turn
+    const float wheelCirc = M_PI * WHEEL_DIAMETER;
+    const float turnDist  = (M_PI * WHEELBASE) / 4.0f;  // quarter turn
+    const float rotationsNeeded = turnDist / wheelCirc;
+    const float pulsesTarget = rotationsNeeded * ENCODER_PPR;
 
     unsigned long lastUpdate = millis();
 
     while (true) {
         unsigned long now = millis();
-        if (now - lastUpdate < SampleMs) continue;
+        if (now - lastUpdate < SAMPLE_MS) continue;
         lastUpdate = now;
 
+        // Read encoder differences
         long leftCount  = ENCODER_Read(0) - startLeft;
         long rightCount = ENCODER_Read(1) - startRight;
 
-        // For right turn, right wheel moves backward, left forward
-        float turnError;
-        if (turnRight)
-            turnError = pulsesTarget - ((leftCount - rightCount) / 2.0f);
-        else
-            turnError = pulsesTarget - ((rightCount - leftCount) / 2.0f);
+        // Compute turn error: average wheel movement
+        float turnError = pulsesTarget - (ffabs(leftCount) + ffabs(rightCount)) / 2.0f;
 
-        // Convert error to normalized target (just like your advance)
-        float errorNorm = turnError / pulsesTarget;
-        errorNorm = clampf(errorNorm, -1.0f, 1.0f);
+        // Normalize error [-1, 1]
+        float errorNorm = clampf(turnError / pulsesTarget, -1.0f, 1.0f);
 
-        // PID update for each motor
-        float control = PID_Update(&motorPID[0], 0.0f, errorNorm, SampleS);
+        // PID update (same controller for both wheels)
+        float control = PID_Update(&motorPID[0], 0.0f, errorNorm, SAMPLE_MS / 1000.0f);
 
-        // Apply opposite speeds to wheels
-        float leftSpeed  =  clampf(control, -1.0f, 1.0f);
+        // Apply speeds: opposite for turning
+        float leftSpeed  = clampf(control, -1.0f, 1.0f);
         float rightSpeed = -clampf(control, -1.0f, 1.0f);
 
-        MOTOR_SetSpeed(0,  leftSpeed);
-        MOTOR_SetSpeed(1,  rightSpeed);
+        if (!turnRight) {  // swap directions for left turn
+            leftSpeed  = -leftSpeed;
+            rightSpeed = -rightSpeed;
+        }
+
+        MOTOR_SetSpeed(0, leftSpeed);
+        MOTOR_SetSpeed(1, rightSpeed);
+
+        // Debug print
+        Serial.print("Left: "); Serial.print(leftCount);
+        Serial.print(" Right: "); Serial.print(rightCount);
+        Serial.print(" Error: "); Serial.println(turnError);
 
         // Stop condition
-        if (fabs(turnError) < 10.0f) { // within 10 pulses
+        if (fabs(turnError) < STOP_THRESHOLD) {
             MOTOR_SetSpeed(0, 0.0f);
             MOTOR_SetSpeed(1, 0.0f);
             Serial.println("Turn 90 complete!");
             break;
         }
     }
+}
 
-}
-void TurnLeft() {
-    Turn90(false);
-}
-void TurnRight() {
-    Turn90(true);
-}
+void TurnLeft()  { Turn90(false); }
+void TurnRight() { Turn90(true); }
