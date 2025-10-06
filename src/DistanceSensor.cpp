@@ -4,6 +4,7 @@
 
 #include "DistanceSensor.h"
 #include <Arduino.h>
+//Check header file for description of each functions
 
 void SetupDistanceSensor() {
     pinMode(redPin, INPUT);

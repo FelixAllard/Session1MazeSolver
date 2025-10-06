@@ -7,6 +7,10 @@
 #include <Arduino.h>
 #include <LibRobus.h>
 
+
+//Honestly, just ask Felix if question
+
+
 PID motorPID[2];                   // PID controllers for each motor
 long lastCountEncoder[2] = {0, 0}; // last encoder readings
 long totalCountEncoder[2] = {0, 0}; // total encoder counts (for sync)

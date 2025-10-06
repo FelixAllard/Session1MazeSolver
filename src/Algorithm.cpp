@@ -21,18 +21,15 @@ void ResetCurrentTile() {
 
 
 void CheckIfTape(){
-    if ((positionX == 1) && (positionY %2 != 0)) {
+    if (positionY %2 != 0) {
         current_tile.leftWall=true;
-        current_tile.straightWall=false;
         current_tile.rightWall=true;
-        current_tile.backWall=false;}
+    }
 
     if (positionX == 0) {
         current_tile.leftWall=true;
-        current_tile.straightWall=false;
-        current_tile.rightWall=false;
-        current_tile.backWall=false;}
-
+    }
+    //TODO make sure condition don't overide each other
     if (positionX == 2) {
         current_tile.leftWall=false;
         current_tile.straightWall=false;
@@ -138,6 +135,7 @@ int GetNextMovement() {
         }
     }
     return 1;
+    //TODO some condit
     //If looking toward right and wall in front, turn to left
 
     //If looking toward left and wall in front, turn to right
@@ -146,12 +144,16 @@ int GetNextMovement() {
     // wall in front, left and right, turn to face backward (fastest way)
 
 }
-//Je melange srm le return de GetNextMovement (changement de direction ou mouvement)
+///@authors Daniela, Felix
+///@brief Logic is responsible for bringing the algorithme together. it is called in a loop iteration in the Loop function of main.cpp
 void Logic() {
+    //We first Reset the current tile
     ResetCurrentTile();
+    //this loop is so that it repeats again and again until it advance
     while (true) {
         bool WallInFront = TestFrontWall();
         int nextMovement = GetNextMovement();
+        //Turn left
         if (nextMovement == 0) {
             TurnLeft();
             facingDirection -=1;
@@ -159,6 +161,15 @@ void Logic() {
                 facingDirection = 3;
             }
         }
+        //Turn right
+        if (nextMovement == 2) {
+            TurnRight();
+            facingDirection +=1;
+            if (facingDirection == 4) {
+                facingDirection = 0;
+            }
+        }
+        //Avance, the return ends the function.
         if (nextMovement == 1) {
             Advance();
             if (facingDirection == 0) {
@@ -174,14 +185,6 @@ void Logic() {
                 positionY--;
             }
             return;
-        }
-
-        if (nextMovement == 2) {
-            TurnRight();
-            facingDirection +=1;
-            if (facingDirection == 4) {
-                facingDirection = 0;
-            }
         }
     }
 }

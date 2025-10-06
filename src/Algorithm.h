@@ -35,20 +35,26 @@ void InitAlgorithm();
 
 
 ///Reset the current tile and should also modivy the struct depending on what the tape is like. ( Call CheckIfTape() function)
+///@authors Felix, Daniela
 void ResetCurrentTile();
 
 
 ///Check with current cardinal coordinate to know if there is a tape around the robot. Called before checking any walls.
+///@authors Felix, Daniela
 void CheckIfTape();
 
 ///@brief Returns the next movement for the robot
-///< 0 = Turn left, 1 = Go straight, 2 = Turn Right
+///@note 0 = Turn left, 1 = Go straight, 2 = Turn Right
+///@authors Felix, Daniela
 int GetNextMovement();
 
 
 ///@brief Check if there is a wall in front and note it in the CurrentTile
+///@authors Felix, Daniela
 bool TestFrontWall();
 
+///@brief APPLICATION Logic, everything goes through this
+///@authors Felix, Daniela, Eva
 void Logic();
 
 
