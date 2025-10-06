@@ -216,7 +216,7 @@ void Logic() {
                 if (facingDirection == 3) {
                     positionYAlgo--;
                 }
-                delay(300);
+
                 return;
 
                 break;

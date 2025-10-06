@@ -32,8 +32,6 @@ void loop() {
     /*PrintToString();
     TurnLeft();*/
     //AdvanceDistance(0.45f, 1.0f);
-    delay(1000);
-
     /*Serial.println("ran");
     Advance(1.0f);
     delay(2000);*/
