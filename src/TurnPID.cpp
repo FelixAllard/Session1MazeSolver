@@ -32,7 +32,7 @@ void Turn90(bool turnRight = true) {
     const float rotationsNeeded = turnDist / wheelCirc;
     const float pulsesTarget = rotationsNeeded * ENCODER_PPR;
 
-    Serial.print("Target pulses for 90° turn: ");
+    //Serial.print("Target pulses for 90° turn: ");
     Serial.println(pulsesTarget);
 
     while (true) {
@@ -47,18 +47,20 @@ void Turn90(bool turnRight = true) {
         MOTOR_SetSpeed(0, turnRight ? TURN_SPEED : -TURN_SPEED);
         MOTOR_SetSpeed(1, turnRight ? -TURN_SPEED : TURN_SPEED);
 
+        /*
         // Debug output
         Serial.print("Left: "); Serial.print(leftCount);
         Serial.print(" | Right: "); Serial.print(rightCount);
         Serial.print(" | Avg: "); Serial.print(avgDist);
         Serial.print(" / "); Serial.println(pulsesTarget);
+        */
 
         // Stop condition: when average distance reaches target
         if (avgDist >= pulsesTarget) {
             MOTOR_SetSpeed(0, 0.0f);
             MOTOR_SetSpeed(1, 0.0f);
             delay(STOP_DELAY); // give motors time to physically stop
-            Serial.println("Turn 90 complete!");
+            //Serial.println("Turn 90 complete!");
             break; // exit loop immediately
         }
     }

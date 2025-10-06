@@ -13,7 +13,7 @@ const float PPR = 3200.0f;
 
 /// @brief Sample period (ms) for control loop
 /// @author Felix
-const float SampleMs = 100;
+const float SampleMs = 50;
 
 /// @brief Sample period (s) for control loop
 /// @author Felix

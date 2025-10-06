@@ -9,7 +9,7 @@
 const int greenPin = 49;
 ///@brief Where the red pin sensor is connected
 ///@author Felix
-const int redPin = 53;
+const int redPin = 47;
 ///@brief A setup function that needs to be executed once before the program uses any other function of the DistanceSensor
 ///@author Felix
 void SetupDistanceSensor();

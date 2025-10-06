@@ -28,17 +28,19 @@ void setup() {
 ///@brief This function simply runs over and over in the runtime. it is called by the Arduino
 ///@author Felix
 void loop() {
-    Serial.println("Hello World");
+    //Serial.println("Hello World");
     /*PrintToString();
     TurnLeft();*/
-    AdvanceDistance(0.45f, 1.0f);
+    //AdvanceDistance(0.45f, 1.0f);
     delay(1000);
 
     /*Serial.println("ran");
     Advance(1.0f);
     delay(2000);*/
 
+    //AdvanceDistance(0.45f, 1.0f);
 
+    //delay(2000);
 
     if(positionYAlgo != 9) {
         Logic();

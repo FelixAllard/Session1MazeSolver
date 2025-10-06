@@ -3,6 +3,9 @@
 //
 
 #include "Algorithm.h"
+
+#include <Arduino.h>
+
 #include "DistanceSensor.h"
 #include "PID.h"
 #include "TurnPID.h"
@@ -10,7 +13,7 @@
 int positionXAlgo =1;
 int positionYAlgo = 0;
 int previousDirection = 0;
-int facingDirection = 0;
+int facingDirection = 1;
 int nextDirection = 0;
 
 
@@ -34,7 +37,6 @@ void CheckIfTape(){
     if (positionXAlgo == 0) {
         current_tile.leftWall=true;
     }
-    //TODO make sure condition don't overide each other
     if (positionXAlgo == 2) {
         current_tile.rightWall=true;
     }
@@ -140,6 +142,21 @@ int GetNextMovement() {
             return 0 ;
         }
     }
+    if (current_tile.leftWall) {
+        if (facingDirection == 0) {
+            return 2 ;
+        }
+    }
+    if (current_tile.rightWall) {
+        if (facingDirection == 2) {
+            return 1 ;
+        }
+    }
+    if (current_tile.straightWall) {
+        if (facingDirection == 1) {
+            return 1 ;
+        }
+    }
 
     return 1;
     //TODO some condit
@@ -158,43 +175,55 @@ void Logic() {
     ResetCurrentTile();
     //this loop is so that it repeats again and again until it advance
     while (true) {
-        TestFrontWall();
+        bool test =TestFrontWall();
+
         int nextMovement = GetNextMovement();
+
+        Serial.print(positionXAlgo);
+        Serial.println(positionYAlgo);
+        Serial.print(test);
+        Serial.println(nextMovement);
         //Turn left
-        if (nextMovement == 0) {
-            TurnLeft();
-            facingDirection -=1;
-            if (facingDirection == -1) {
-                facingDirection = 3;
-            }
-        }
-        //Turn right
-        if (nextMovement == 2) {
-            TurnRight();
-            facingDirection +=1;
-            if (facingDirection == 4) {
-                facingDirection = 0;
-            }
-        }
-        //Avance, the return ends the function.
-        if (nextMovement == 1) {
-            AdvanceDistance(0.45f, 1.0f);
-            if (facingDirection == 0) {
-                positionXAlgo--;
-            }
-            if (facingDirection == 1) {
-                positionYAlgo++;
-            }
-            if (facingDirection == 2) {
-                positionXAlgo++;
-            }
-            if (facingDirection == 3) {
-                positionYAlgo--;
-            }
-            return;
+
+        switch (nextMovement) {
+            case 0:
+                TurnLeft();
+                facingDirection -=1;
+                if (facingDirection == -1) {
+                    facingDirection = 3;
+                }
+                break;
+
+            case 2:
+
+                TurnRight();
+                facingDirection +=1;
+                if (facingDirection == 4) {
+                    facingDirection = 0;
+                }
+                break;
+            case 1:
+                AdvanceDistance(0.45f, 1.0f);
+                if (facingDirection == 0) {
+                    positionXAlgo--;
+                }
+                if (facingDirection == 1) {
+                    positionYAlgo++;
+                }
+                if (facingDirection == 2) {
+                    positionXAlgo++;
+                }
+                if (facingDirection == 3) {
+                    positionYAlgo--;
+                }
+                delay(300);
+                return;
+
+                break;
+            default:
+
+                Serial.println("We reached nothing. WTF");
+                return;
         }
     }
 }
-
-
-

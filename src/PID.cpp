@@ -21,6 +21,7 @@ long totalCountEncoder[2] = {0, 0}; // total encoder counts (for sync)
 
 
 static bool rampUp = true;
+static const float INTEGRAL_MAX = 10.0f; // anti-windup limit
 
 
 // Helper clamp
@@ -30,8 +31,8 @@ static inline float clampf(float v, float lo, float hi) {
     return v;
 }
 
-static const float INTEGRAL_MAX = 10.0f; // anti-windup limit
-
+// Track if PID state has been initialized
+static bool pidStateInitialized[2] = {false, false};
 
 void ResetPIDState() {
     for (int i = 0; i < 2; i++) {
@@ -46,7 +47,7 @@ void Advance(float motorFraction) {
     motorFraction = clampf(motorFraction, 0.0f, 1.0f);
 
     // Initialize both PIDs
-    PIDS_Init(0.3f, 0.04f, 0.03f);
+    PIDS_Init(0.25f, 0.04f, 0.03f);
 
     // Reset integrals
     for (int i = 0; i < 2; i++) {
@@ -98,26 +99,32 @@ void Advance(float motorFraction) {
 
 // Moves the robot a specific distance in meters
 // fractionSpeed: 0.0–1.0 (normalized motor speed fraction)
+
+
+
+
+
+// Updates both motors with PID + sync correction
 void AdvanceDistance(float distanceMeters, float fractionSpeed) {
+    // Clamp speed fraction
+    fractionSpeed = clampf(fractionSpeed, 0.0f, 1.0f);
+
     // Convert distance to encoder pulses
-    const float wheelRadius = 0.0385f;
+    const float wheelRadius = 0.0385f; // meters
     long targetPulses = (long)((distanceMeters / (2.0f * 3.14159f * wheelRadius)) * PPR);
 
-    // Reset encoders
+    // Reset encoders and PID state
     ENCODER_Reset(0);
     ENCODER_Reset(1);
     lastCountEncoder[0] = 0;
     lastCountEncoder[1] = 0;
     totalCountEncoder[0] = 0;
     totalCountEncoder[1] = 0;
-
     ResetPIDState();
     PIDS_Init(0.25f, 0.05f, 0.03f); // PID tuning
-    motorPID[0].integral = 0.0f;
-    motorPID[1].integral = 0.0f;
 
-    float currentSpeedRef = 0.0f;
-    const float accelStep = 0.05f;
+    float currentSpeedRef = 0.0f;      // ramping variable
+    const float accelStep = 0.02f;     // fraction per loop
     unsigned long lastUpdate = millis();
 
     while (true) {
@@ -125,30 +132,45 @@ void AdvanceDistance(float distanceMeters, float fractionSpeed) {
         if (now - lastUpdate >= SampleMs) {
             lastUpdate = now;
 
-            // Ramp up to target fraction
+            // --- Ramp up gradually ---
             if (currentSpeedRef < fractionSpeed) {
                 currentSpeedRef += accelStep;
                 if (currentSpeedRef > fractionSpeed) currentSpeedRef = fractionSpeed;
             }
 
-            // PID + sync
+            // --- PID + sync control ---
             PID_ControlMotors(currentSpeedRef);
 
-            // Check distance
+            // --- Check distance ---
             long avgPulses = (totalCountEncoder[0] + totalCountEncoder[1]) / 2;
             if (avgPulses >= targetPulses) break;
         }
     }
 
-    // Smooth stop
+    // --- Smooth stop ---
+    float decelSpeed = currentSpeedRef;
+    while (decelSpeed > 0.0f) {
+        unsigned long now = millis();
+        if (now - lastUpdate >= SampleMs) {
+            lastUpdate = now;
+            decelSpeed -= accelStep;           // ramp down
+            if (decelSpeed < 0.0f) decelSpeed = 0.0f;
+
+            if (decelSpeed > 0.0f) {
+                PID_ControlMotors(decelSpeed);
+            } else {
+                // Hard stop
+                MOTOR_SetSpeed(0, 0.0f);
+                MOTOR_SetSpeed(1, 0.0f);
+                break;
+            }
+        }
+    }
+
+
     MOTOR_SetSpeed(0, 0.0f);
     MOTOR_SetSpeed(1, 0.0f);
 }
-
-
-
-
-// Updates both motors with PID + sync correction
 void PID_ControlMotors(float targetSpeed) {
     float measured[2];
     long diff[2];
@@ -215,8 +237,8 @@ float PID_Update(PID* Pid, float setpoint, float measured, float dt) {
     return P + I + D;
 }
 
-// Track if PID state has been initialized
-static bool pidStateInitialized[2] = {false, false};
+
+
 
 // Initialize one PID
 void PID_Init(PID* _pid, float kp, float ki, float kd, int motorIndex) {

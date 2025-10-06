@@ -7,8 +7,9 @@
 //Check header file for description of each functions
 
 void SetupDistanceSensor() {
-    pinMode(redPin, INPUT);
-    pinMode(greenPin, INPUT);
+    pinMode(redPin, INPUT_PULLUP);
+    pinMode(greenPin, INPUT_PULLUP);
+
 }
 bool GetRedSensor() {
     bool red = !digitalRead(redPin);
@@ -21,12 +22,15 @@ bool GetGreenSensor() {
     return green;
 }
 bool GetBothSensor() {
+
     bool red = !digitalRead(redPin);
     bool green = !digitalRead(greenPin);
+
     if (red && green) {
         return true;
     }
     else {
         return false;
     }
+
 }
