@@ -39,6 +39,9 @@ extern PID motorPID[2];
 
 /// @brief Functions
 void Advance(float targetSpeed);                                   ///< Run main loop
+
+void TurnLeft();
+void TurnRight();
 void PID_Init(PID* _pid, float kp, float ki, float kd);            ///< Init one PID
 void PIDS_Init(float kp, float ki, float kd);                      ///< Init both PIDs
 float PID_Update(PID* Pid, float setpoint, float measured, float dt); ///< Update one PID
