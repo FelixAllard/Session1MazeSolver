@@ -31,22 +31,16 @@ void CheckIfTape(){
     }
     //TODO make sure condition don't overide each other
     if (positionX == 2) {
-        current_tile.leftWall=false;
-        current_tile.straightWall=false;
         current_tile.rightWall=true;
-        current_tile.backWall=false;}
+    }
 
     if (positionY == 0) {
-        current_tile.leftWall=false;
-        current_tile.straightWall=false;
-        current_tile.rightWall=false;
-        current_tile.backWall=true;}
+        current_tile.backWall=true;
+    }
 
     if (positionY == 9) {
-        current_tile.leftWall=false;
-        current_tile.straightWall=true;
-        current_tile.rightWall=false;
-        current_tile.backWall=false;}
+        current_tile.straightWall=true; //TODO Ecq cette condition va faire que le robot bouge (aille a gauche ou droite?) faudrait tu l'enlever? ecq elle importe meme?
+    }
 }
 
 
@@ -116,22 +110,30 @@ int GetNextMovement() {
             return 2 ;
         }
     }
-
+    if (current_tile.straightWall && current_tile.leftWall) {
+        if (facingDirection == 0) {
+            return 2 ; //TODO faudrait pas return 3?
+        }
+    }
     if (current_tile.straightWall && current_tile.rightWall) {
         if (facingDirection == 1) {
             return 0 ;
         }
     }
 
-    if (current_tile.straightWall && current_tile.leftWall) {
-        if (facingDirection == 0) {
-            return 2 ;
-        }
-    }
-
     if (current_tile.straightWall && current_tile.rightWall) {
         if (facingDirection == 2) {
+            return 0 ; //TODO faudrait pas return 3?
+        }
+    }
+    if (current_tile.straightWall) {
+        if (facingDirection == 1) {
             return 0 ;
+        }
+    }
+    if (current_tile.straightWall && current_tile.leftWall && current_tile.rightWall) {
+        if (facingDirection == 1) {
+            return 3 ;  //TODO pk unreadable?
         }
     }
     return 1;
@@ -186,16 +188,6 @@ void Logic() {
             }
             return;
         }
-    }
-}
-
-void Sequence() {
-    while (positionY < 9){
-        ResetCurrentTile();
-        CheckIfTape();
-        TestFrontWall();
-        GetNextMovement();
-        Logic();
     }
 }
 
