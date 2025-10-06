@@ -3,12 +3,14 @@
 #include <DistanceSensor.h>
 #include <PID.h>
 #include "main.h"
+#include "Whistle.h"
 //MOTOR de gauche = 0
 //MOTOR de droite = 1
 
 void setup() {
     BoardInit(); // Init the board
     SetupDistanceSensor(); // Setup the distance sensor
+    SetupWhistle();
     Serial.begin(115200);//Start Serial monitor display
     delay(300);
     ENCODER_Reset(0);
@@ -29,11 +31,6 @@ void setup() {
 }
 
 void loop() {
-
-    Serial.print("Sonar 0 = " );
-    Serial.print(GetBothSensor());
-
-    Serial.print("\n");
-    Advance(3.0f);
-    delay(1000);
+    Serial.println("Hello World");
+    PrintToString();
 }
