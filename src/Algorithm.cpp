@@ -149,7 +149,7 @@ int GetNextMovement() {
     }
     if (current_tile.rightWall) {
         if (facingDirection == 2) {
-            return 1 ;
+            return 0 ;
         }
     }
     if (current_tile.straightWall) {
@@ -203,7 +203,7 @@ void Logic() {
                 }
                 break;
             case 1:
-                AdvanceDistance(0.45f, 1.0f);
+                AdvanceDistance(0.30f, 1.0f);
                 if (facingDirection == 0) {
                     positionXAlgo--;
                 }

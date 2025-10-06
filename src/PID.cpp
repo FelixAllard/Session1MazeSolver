@@ -10,8 +10,9 @@
 
 //Honestly, just ask Felix if question
 
-#define SYNC_KP 0.03f
-#define SYNC_KP_POS 0.02f
+#define SYNC_KP 0.05f
+#define SYNC_KP_POS 0.03f
+
 
 
 
@@ -191,21 +192,27 @@ void PID_ControlMotors(float targetSpeed) {
 
     // --- Left motor PID ---
     float control0 = PID_Update(&motorPID[0], targetSpeed, measured[0], SampleS);
-    control0 = clampf(control0, 0.0f, 1.0f);
-    MOTOR_SetSpeed(0, control0);
 
-    // --- Right motor PID + small sync correction ---
+    // --- Right motor PID ---
     float control1 = PID_Update(&motorPID[1], targetSpeed, measured[1], SampleS);
 
-    // Add small correction based on speed difference
-    float syncError = measured[0] - measured[1];
+    // --- Sync corrections ---
+    float syncError = measured[0] - measured[1];  // speed difference
     control1 += SYNC_KP * syncError;
 
-    // Add correction based on **position difference**
-    float positionError = (totalCountEncoder[0] - totalCountEncoder[1]) / PPR;
+    float positionError = (totalCountEncoder[0] - totalCountEncoder[1]) / PPR; // distance diff
     control1 += SYNC_KP_POS * positionError;
 
+    // --- Static motor bias correction (hardware imbalance) ---
+    const float motorBias[2] = {1.00f, 1.025f}; // right motor needs ~4% more speed
+    control0 *= motorBias[0];
+    control1 *= motorBias[1];
+
+    // --- Clamp and send to motors ---
+    control0 = clampf(control0, 0.0f, 1.0f);
     control1 = clampf(control1, 0.0f, 1.0f);
+
+    MOTOR_SetSpeed(0, control0);
     MOTOR_SetSpeed(1, control1);
 }
 
