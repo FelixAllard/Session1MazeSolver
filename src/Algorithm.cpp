@@ -4,7 +4,7 @@
 
 #include "Algorithm.h"
 #include "DistanceSensor.h"
-
+#include "PID.h"
 
 
 
@@ -147,24 +147,44 @@ int GetNextMovement() {
 
 }
 //Je melange srm le return de GetNextMovement (changement de direction ou mouvement)
-void Advance() {
-    int nextMovement = GetNextMovement();
+void Logic() {
+    ResetCurrentTile();
+    while (true) {
+        bool WallInFront = TestFrontWall();
+        int nextMovement = GetNextMovement();
+        if (nextMovement == 0) {
+            TurnLeft();
+            facingDirection -=1;
+            if (facingDirection == -1) {
+                facingDirection = 3;
+            }
+        }
+        if (nextMovement == 1) {
+            Advance();
+            if (facingDirection == 0) {
+                positionX--;
+            }
+            if (facingDirection == 1) {
+                positionY++;
+            }
+            if (facingDirection == 2) {
+                positionX++;
+            }
+            if (facingDirection == 3) {
+                positionY--;
+            }
+            return;
+        }
 
-    // Si nextMovement = 0 ou 2, danse cas change facing direction
-    // Si next movement = 1, change la case d/pendament du facing direction
-
-    if (nextMovement == 0)
-        positionX--;
-    if (nextMovement == 1)
-        positionY++;
-    if (GetNextMovement() == 2)
-        positionX++;
-//    if (GetNextMovement() == 3)
-//       positionY--;
-
-
+        if (nextMovement == 2) {
+            TurnRight();
+            facingDirection +=1;
+            if (facingDirection == 4) {
+                facingDirection = 0;
+            }
+        }
+    }
 }
-
 
 void Sequence() {
     while (positionY < 9){
@@ -172,7 +192,7 @@ void Sequence() {
         CheckIfTape();
         TestFrontWall();
         GetNextMovement();
-        Advance();
+        Logic();
     }
 }
 

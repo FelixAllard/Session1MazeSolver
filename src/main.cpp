@@ -6,6 +6,8 @@
 //MOTOR de gauche = 0
 //MOTOR de droite = 1
 
+#include "Algorithm.h"
+
 void setup() {
     BoardInit(); // Init the board
     SetupDistanceSensor(); // Setup the distance sensor
@@ -29,11 +31,9 @@ void setup() {
 }
 
 void loop() {
+    Logic();
 
-    Serial.print("Sonar 0 = " );
-    Serial.print(GetBothSensor());
 
-    Serial.print("\n");
-    Advance(3.0f);
-    delay(1000);
+
+
 }

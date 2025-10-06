@@ -49,6 +49,7 @@ int GetNextMovement();
 ///@brief Check if there is a wall in front and note it in the CurrentTile
 bool TestFrontWall();
 
+void Logic();
 
 
 #endif //SESSION1MAZESOLVER_ALGORITHM_H
