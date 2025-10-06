@@ -25,6 +25,8 @@ void setup() {
 ///@brief This function simply runs over and over in the runtime. it is called by the Arduino
 ///@author Felix
 void loop() {
-    Logic();
+     if(positionY != 9) {
+         Logic();
+     }
 
 }

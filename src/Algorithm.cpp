@@ -3,9 +3,16 @@
 //
 
 #include "Algorithm.h"
+
+#include <Arduino.h>
+
 #include "DistanceSensor.h"
 #include "PID.h"
 
+void DetectHz() {
+
+    loop()
+}
 
 
 
@@ -36,10 +43,6 @@ void CheckIfTape(){
 
     if (positionY == 0) {
         current_tile.backWall=true;
-    }
-
-    if (positionY == 9) {
-        current_tile.straightWall=true; //TODO Ecq cette condition va faire que le robot bouge (aille a gauche ou droite?) faudrait tu l'enlever? ecq elle importe meme?
     }
 }
 
@@ -105,25 +108,33 @@ int GetNextMovement() {
         }
     }
 
+    if (current_tile.straightWall && current_tile.leftWall && current_tile.rightWall) {
+        if (facingDirection == 1) {
+            return 0 ;
+        }
+        if (facingDirection == 0) {
+            return 0 ;
+        }
+        if (facingDirection == 2) {
+            return 2 ;
+        }
+    }
+
     if (current_tile.straightWall && current_tile.leftWall) {
         if (facingDirection == 1) {
             return 2 ;
         }
-    }
-    if (current_tile.straightWall && current_tile.leftWall) {
         if (facingDirection == 0) {
-            return 2 ; //TODO faudrait pas return 3?
-        }
-    }
-    if (current_tile.straightWall && current_tile.rightWall) {
-        if (facingDirection == 1) {
-            return 0 ;
+            return 2 ;
         }
     }
 
     if (current_tile.straightWall && current_tile.rightWall) {
+        if (facingDirection == 1) {
+            return 0 ;
+        }
         if (facingDirection == 2) {
-            return 0 ; //TODO faudrait pas return 3?
+            return 0 ;
         }
     }
     if (current_tile.straightWall) {
@@ -131,11 +142,7 @@ int GetNextMovement() {
             return 0 ;
         }
     }
-    if (current_tile.straightWall && current_tile.leftWall && current_tile.rightWall) {
-        if (facingDirection == 1) {
-            return 3 ;  //TODO pk unreadable?
-        }
-    }
+
     return 1;
     //TODO some condit
     //If looking toward right and wall in front, turn to left
