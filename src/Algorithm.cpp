@@ -8,6 +8,7 @@
 
 #include "DistanceSensor.h"
 #include "PID.h"
+#include "TurnPID.h"
 
 void DetectHz() {
 

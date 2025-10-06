@@ -50,14 +50,14 @@ extern PID motorPID[2];
 /// @author Felix
 void Advance(float targetSpeed = 1.0f);                                   ///< Run main loop
 
-///@brief function that turns 90 degrees left
+/*///@brief function that turns 90 degrees left
 ///@exception NotImplemented
 ///@author Felix
 void TurnLeft();
 ///@brief Function that turns 90 degrees right
 ///@exception NotImplemented
 ///@author Felix
-void TurnRight();
+void TurnRight();*/
 void PID_Init(PID* _pid, float kp, float ki, float kd);            ///< Init one PID
 void PIDS_Init(float kp, float ki, float kd);                      ///< Init both PIDs
 float PID_Update(PID* Pid, float setpoint, float measured, float dt); ///< Update one PID
