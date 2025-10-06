@@ -29,7 +29,7 @@ void setup() {
 void loop() {
     Serial.println("Hello World");
     PrintToString();
-    TurnLeft();
+    TurnRight();
     delay(1000);
 
     /*Serial.println("ran");
