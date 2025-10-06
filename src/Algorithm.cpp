@@ -9,6 +9,13 @@
 #include "DistanceSensor.h"
 #include "PID.h"
 
+void DetectHz() {
+
+    loop();
+}
+
+
+
 CurrentTile current_tile;
 
 void ResetCurrentTile() {
@@ -153,7 +160,7 @@ void Logic() {
     ResetCurrentTile();
     //this loop is so that it repeats again and again until it advance
     while (true) {
-        TestFrontWall();
+        bool WallInFront = TestFrontWall();
         int nextMovement = GetNextMovement();
         //Turn left
         if (nextMovement == 0) {
