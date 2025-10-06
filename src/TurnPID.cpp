@@ -9,9 +9,9 @@
 
 
 
-#define TURN_KP 0.02f
-#define TURN_KI 0.0005f
-#define TURN_KD 0.001f
+#define TURN_KP 0.05f
+#define TURN_KI 0.001f
+#define TURN_KD 0.002f
 
 #define STOP_THRESHOLD 50   // pulses tolerance to stop
 #define ENCODER_PPR 3200.0f
@@ -76,6 +76,9 @@ void Turn90(bool turnRight = true) {
 
         MOTOR_SetSpeed(0, leftSpeed);
         MOTOR_SetSpeed(1, rightSpeed);
+
+        Serial.print(leftSpeed);
+        Serial.print(rightSpeed);
 
         // Debug print
         Serial.print("Left: "); Serial.print(leftCount);
