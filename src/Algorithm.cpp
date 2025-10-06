@@ -3,9 +3,16 @@
 //
 
 #include "Algorithm.h"
+
+#include <Arduino.h>
+
 #include "DistanceSensor.h"
+#include "PID.h"
 
+void DetectHz() {
 
+    loop()
+}
 
 
 
@@ -21,35 +28,22 @@ void ResetCurrentTile() {
 
 
 void CheckIfTape(){
-    if ((positionX == 1) && (positionY %2 != 0)) {
+    if (positionY %2 != 0) {
         current_tile.leftWall=true;
-        current_tile.straightWall=false;
         current_tile.rightWall=true;
-        current_tile.backWall=false;}
+    }
 
     if (positionX == 0) {
         current_tile.leftWall=true;
-        current_tile.straightWall=false;
-        current_tile.rightWall=false;
-        current_tile.backWall=false;}
-
+    }
+    //TODO make sure condition don't overide each other
     if (positionX == 2) {
-        current_tile.leftWall=false;
-        current_tile.straightWall=false;
         current_tile.rightWall=true;
-        current_tile.backWall=false;}
+    }
 
     if (positionY == 0) {
-        current_tile.leftWall=false;
-        current_tile.straightWall=false;
-        current_tile.rightWall=false;
-        current_tile.backWall=true;}
-
-    if (positionY == 9) {
-        current_tile.leftWall=false;
-        current_tile.straightWall=true;
-        current_tile.rightWall=false;
-        current_tile.backWall=false;}
+        current_tile.backWall=true;
+    }
 }
 
 
@@ -114,30 +108,43 @@ int GetNextMovement() {
         }
     }
 
-    if (current_tile.straightWall && current_tile.leftWall) {
+    if (current_tile.straightWall && current_tile.leftWall && current_tile.rightWall) {
         if (facingDirection == 1) {
+            return 0 ;
+        }
+        if (facingDirection == 0) {
+            return 0 ;
+        }
+        if (facingDirection == 2) {
             return 2 ;
         }
     }
 
-    if (current_tile.straightWall && current_tile.rightWall) {
-        if (facingDirection == 1) {
-            return 0 ;
-        }
-    }
-
     if (current_tile.straightWall && current_tile.leftWall) {
+        if (facingDirection == 1) {
+            return 2 ;
+        }
         if (facingDirection == 0) {
             return 2 ;
         }
     }
 
     if (current_tile.straightWall && current_tile.rightWall) {
+        if (facingDirection == 1) {
+            return 0 ;
+        }
         if (facingDirection == 2) {
             return 0 ;
         }
     }
+    if (current_tile.straightWall) {
+        if (facingDirection == 1) {
+            return 0 ;
+        }
+    }
+
     return 1;
+    //TODO some condit
     //If looking toward right and wall in front, turn to left
 
     //If looking toward left and wall in front, turn to right
@@ -146,28 +153,48 @@ int GetNextMovement() {
     // wall in front, left and right, turn to face backward (fastest way)
 
 }
-//Je melange srm le return de GetNextMovement (changement de direction ou mouvement)
-void Advance() {
-    if (GetNextMovement() == 0)
-        positionX--;
-    if (GetNextMovement() == 1)
-        positionY++;
-    if (GetNextMovement() == 2)
-        positionX++;
-//    if (GetNextMovement() == 3)
-//       positionY--;
-
-
-}
-
-
-void Sequence() {
-    while (positionY < 9){
-        ResetCurrentTile();
-        CheckIfTape();
-        TestFrontWall();
-        GetNextMovement();
-        Advance();
+///@authors Daniela, Felix
+///@brief Logic is responsible for bringing the algorithme together. it is called in a loop iteration in the Loop function of main.cpp
+void Logic() {
+    //We first Reset the current tile
+    ResetCurrentTile();
+    //this loop is so that it repeats again and again until it advance
+    while (true) {
+        bool WallInFront = TestFrontWall();
+        int nextMovement = GetNextMovement();
+        //Turn left
+        if (nextMovement == 0) {
+            TurnLeft();
+            facingDirection -=1;
+            if (facingDirection == -1) {
+                facingDirection = 3;
+            }
+        }
+        //Turn right
+        if (nextMovement == 2) {
+            TurnRight();
+            facingDirection +=1;
+            if (facingDirection == 4) {
+                facingDirection = 0;
+            }
+        }
+        //Avance, the return ends the function.
+        if (nextMovement == 1) {
+            Advance();
+            if (facingDirection == 0) {
+                positionX--;
+            }
+            if (facingDirection == 1) {
+                positionY++;
+            }
+            if (facingDirection == 2) {
+                positionX++;
+            }
+            if (facingDirection == 3) {
+                positionY--;
+            }
+            return;
+        }
     }
 }
 

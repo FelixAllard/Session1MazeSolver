@@ -7,11 +7,15 @@
 #include <Arduino.h>
 #include <LibRobus.h>
 
+
+//Honestly, just ask Felix if question
+
+
 PID motorPID[2];                   // PID controllers for each motor
 long lastCountEncoder[2] = {0, 0}; // last encoder readings
 long totalCountEncoder[2] = {0, 0}; // total encoder counts (for sync)
 
-
+const float SYNC_KP_POS = 0.05f;
 static bool rampUp = true;
 
 
@@ -45,18 +49,18 @@ void Advance(float targetSpeed) {
                 currentSpeedRef += accelStep;
                 if (currentSpeedRef >= targetSpeed) {
                     currentSpeedRef = targetSpeed;
-                    rampUp = false; // switch to deceleration
+                    rampUp = false; // start deceleration next
                 }
             } else {
-                currentSpeedRef -= accelStep*2;
+                currentSpeedRef -= accelStep;
                 if (currentSpeedRef <= 0.0f) {
                     currentSpeedRef = 0.0f;
-                    rampUp = true; // switch to acceleration
-                    Serial.print("Reached Acceleration End" );
-                    MOTOR_SetSpeed(0,0.0f);
-                    MOTOR_SetSpeed(1,0.0f);
-                    return;
-
+                    rampUp = true; // ready for next run
+                    Serial.println("Reached Acceleration End");
+                    // Keep PID state; just stop motors smoothly
+                    MOTOR_SetSpeed(0, 0.0f);
+                    MOTOR_SetSpeed(1, 0.0f);
+                    break;  // exit loop instead of return
                 }
             }
 
@@ -105,8 +109,13 @@ void PID_ControlMotors(float targetSpeed) {
     float syncError = measured[0] - measured[1];
     control1 += SYNC_KP * syncError;
 
+    // Add correction based on **position difference**
+    float positionError = (totalCountEncoder[0] - totalCountEncoder[1]) / PPR;
+    control1 += SYNC_KP_POS * positionError;  // SYNC_KP_POS e.g., 0.01f
+
     control1 = clampf(control1, 0.0f, 1.0f);
     MOTOR_SetSpeed(1, control1);
+
 }
 
 
@@ -137,19 +146,28 @@ float PID_Update(PID* Pid, float setpoint, float measured, float dt) {
     return P + I + D;
 }
 
+// Track if PID state has been initialized
+static bool pidStateInitialized[2] = {false, false};
+
 // Initialize one PID
-void PID_Init(PID* _pid, float kp, float ki, float kd) {
+void PID_Init(PID* _pid, float kp, float ki, float kd, int motorIndex) {
     _pid->kp = kp;
     _pid->ki = ki;
     _pid->kd = kd;
-    _pid->integral = 0.0f;
-    _pid->lastError = 0.0f;
-    _pid->lastDerivative = 0.0f;
+
+    // Only reset state once per motor
+    if (!pidStateInitialized[motorIndex]) {
+        _pid->integral = 0.0f;
+        _pid->lastError = 0.0f;
+        _pid->lastDerivative = 0.0f;
+        pidStateInitialized[motorIndex] = true;
+    }
 }
 
 // Initialize both PIDs
 void PIDS_Init(float kp, float ki, float kd) {
-    PID_Init(&motorPID[0], kp, ki, kd);
-    PID_Init(&motorPID[1], kp, ki, kd);
+    PID_Init(&motorPID[0], kp, ki, kd, 0);
+    PID_Init(&motorPID[1], kp, ki, kd, 1);
 }
+
 

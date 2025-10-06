@@ -7,24 +7,31 @@
 
 
 /// @brief Number of pulses per rotation (encoder resolution)
+/// @author Felix
 const float PPR = 3200.0f;
 
 /// @brief Sample period (ms) for control loop
+/// @author Felix
 const float SampleMs = 63;
 
 /// @brief Sample period (s) for control loop
+/// @author Felix
 const float SampleS = SampleMs / 1000.0f;
 
 /// @brief Motor top speed (rotations per second, RPS)
+/// @author Felix
 const float maxRPS = 1.0f;
 
 /// @brief Last encoder readings (global for both motors)
+/// @author Felix
 extern long lastCountEncoder[2];
 
 /// @brief Accumulated encoder counts (for synchronization correction)
+/// @author Felix
 extern long totalCountEncoder[2];
 
 /// @brief Discrete PID controller state and parameters
+///@author Felix
 struct PID {
     float kp;             ///< Proportional gain
     float ki;             ///< Integral gain
@@ -35,10 +42,21 @@ struct PID {
 };
 
 /// @brief Two PID controllers (one for each motor)
+/// @author Felix
 extern PID motorPID[2];
 
-/// @brief Functions
+/// @brief Function that advances exactly 0.5m
+/// @author Felix
 void Advance(float targetSpeed);                                   ///< Run main loop
+
+///@brief function that turns 90 degrees left
+///@exception NotImplemented
+///@author Felix
+void TurnLeft();
+///@brief Function that turns 90 degrees right
+///@exception NotImplemented
+///@author Felix
+void TurnRight();
 void PID_Init(PID* _pid, float kp, float ki, float kd);            ///< Init one PID
 void PIDS_Init(float kp, float ki, float kd);                      ///< Init both PIDs
 float PID_Update(PID* Pid, float setpoint, float measured, float dt); ///< Update one PID
