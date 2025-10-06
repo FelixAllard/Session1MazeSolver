@@ -6,10 +6,10 @@
 #include <stdio.h>
 #include <Arduino.h>
 #include <LibRobus.h>
-
+int lastRead;
 void SetupWhistle() {
-    pinMode(pinBruit, INPUT) ;
-    pinMode(pinIntensite, INPUT) ;
+    pinMode(pinBruitAmbiant, INPUT) ;
+    pinMode(pinIntensite_5HZ, INPUT) ;
 }
 
 float GetFrequence() {
@@ -22,7 +22,11 @@ bool Sifflet() {
 }
 
 void PrintToString() {
-    Serial.println(digitalRead(pinBruit)) ;
-    Serial.println(digitalRead(pinIntensite)) ;
+    //Serial.println(analogRead(pinBruitAmbiant)) ;
+    int result = analogRead(pinIntensite_5HZ);
+    Serial.println(result) ;
+    Serial.println(lastRead-result);
+    lastRead = result;
+    delay(300);
 
 }

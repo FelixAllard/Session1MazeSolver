@@ -6,13 +6,14 @@
 #define SESSION1MAZESOLVER_PID_H
 
 
+
 /// @brief Number of pulses per rotation (encoder resolution)
 /// @author Felix
 const float PPR = 3200.0f;
 
 /// @brief Sample period (ms) for control loop
 /// @author Felix
-const float SampleMs = 63;
+const float SampleMs = 100;
 
 /// @brief Sample period (s) for control loop
 /// @author Felix
@@ -30,7 +31,7 @@ extern long lastCountEncoder[2];
 /// @author Felix
 extern long totalCountEncoder[2];
 
-/// @brief Discrete PID controller state and parameters
+///@brief Discrete PID controller state and parameters
 ///@author Felix
 struct PID {
     float kp;             ///< Proportional gain
@@ -47,7 +48,7 @@ extern PID motorPID[2];
 
 /// @brief Function that advances exactly 0.5m
 /// @author Felix
-void Advance(float targetSpeed);                                   ///< Run main loop
+void Advance(float targetSpeed = 1.0f);                                   ///< Run main loop
 
 ///@brief function that turns 90 degrees left
 ///@exception NotImplemented

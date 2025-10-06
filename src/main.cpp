@@ -7,7 +7,7 @@
 //MOTOR de gauche = 0
 //MOTOR de droite = 1
 
-#include "Algorithm.h"
+
 
 ///@brief This function is called once before everything by the arduino
 ///@author Felix
@@ -29,8 +29,14 @@ void setup() {
 void loop() {
     Serial.println("Hello World");
     PrintToString();
-    /* if(positionY != 9) {
-         Logic();
-     }*/
 
+    /*Serial.println("ran");
+    Advance(1.0f);
+    delay(2000);*/
+
+
+
+    /* if(positionY != 9) {
+             Logic();
+         }*/
 }

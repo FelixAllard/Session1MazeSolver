@@ -10,12 +10,16 @@
 
 //Honestly, just ask Felix if question
 
+#define SYNC_KP 0.03f
+#define SYNC_KP_POS 0.02f
+
+
 
 PID motorPID[2];                   // PID controllers for each motor
 long lastCountEncoder[2] = {0, 0}; // last encoder readings
 long totalCountEncoder[2] = {0, 0}; // total encoder counts (for sync)
 
-const float SYNC_KP_POS = 0.05f;
+
 static bool rampUp = true;
 
 
@@ -27,11 +31,12 @@ static inline float clampf(float v, float lo, float hi) {
 }
 
 static const float INTEGRAL_MAX = 10.0f; // anti-windup limit
-static const float SYNC_KP = 0.05f;      // sync correction gain (tune this)
 
-void Advance(float targetSpeed) {
+
+void Advance(float targetSpeed = 1.0f) {
     // Initialize both PIDs (tune these values)
     PIDS_Init(0.30f, 0.04f, 0.03f);
+
     for (int i = 0; i < 2; i++) {
         motorPID[i].integral = 0.0f;//targetSpeed / motorPID[i].ki * 0.5f; // small prefill
     }
@@ -51,20 +56,32 @@ void Advance(float targetSpeed) {
                     currentSpeedRef = targetSpeed;
                     rampUp = false; // start deceleration next
                 }
-            } else {
+            }
+            else {
+
                 currentSpeedRef -= accelStep;
                 if (currentSpeedRef <= 0.0f) {
                     currentSpeedRef = 0.0f;
                     rampUp = true; // ready for next run
+
+                    // --- Smooth PID restart handling ---
+                    // Don't reset encoder totals (we want straight-line continuity)
+                    // Just damp PID state to prevent bursts next cycle
+                    for (int i = 0; i < 2; i++) {
+                        motorPID[i].integral *= 0.5f;     // decay accumulated error
+                        motorPID[i].lastError *= 0.5f;
+                        motorPID[i].lastDerivative = 0.0f;
+                    }
+
                     Serial.println("Reached Acceleration End");
-                    // Keep PID state; just stop motors smoothly
+
                     MOTOR_SetSpeed(0, 0.0f);
                     MOTOR_SetSpeed(1, 0.0f);
+
                     break;  // exit loop instead of return
                 }
+
             }
-
-
 
 
             lastUpdate = now;
@@ -93,10 +110,6 @@ void PID_ControlMotors(float targetSpeed) {
         measured[i] = clampf(measured[i], 0.0f, 1.0f);
     }
 
-
-
-
-
     // --- Left motor PID ---
     float control0 = PID_Update(&motorPID[0], targetSpeed, measured[0], SampleS);
     control0 = clampf(control0, 0.0f, 1.0f);
@@ -111,11 +124,10 @@ void PID_ControlMotors(float targetSpeed) {
 
     // Add correction based on **position difference**
     float positionError = (totalCountEncoder[0] - totalCountEncoder[1]) / PPR;
-    control1 += SYNC_KP_POS * positionError;  // SYNC_KP_POS e.g., 0.01f
+    control1 += SYNC_KP_POS * positionError;
 
     control1 = clampf(control1, 0.0f, 1.0f);
     MOTOR_SetSpeed(1, control1);
-
 }
 
 
