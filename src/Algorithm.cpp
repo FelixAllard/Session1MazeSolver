@@ -3,18 +3,15 @@
 //
 
 #include "Algorithm.h"
-
-#include <Arduino.h>
-
 #include "DistanceSensor.h"
 #include "PID.h"
 #include "TurnPID.h"
 
-void DetectHz() {
-
-    loop();
-}
-
+int positionXAlgo =1;
+int positionYAlgo = 0;
+int previousDirection = 0;
+int facingDirection = 0;
+int nextDirection = 0;
 
 
 CurrentTile current_tile;
@@ -29,20 +26,20 @@ void ResetCurrentTile() {
 
 
 void CheckIfTape(){
-    if (positionY %2 != 0) {
+    if (positionYAlgo %2 != 0) {
         current_tile.leftWall=true;
         current_tile.rightWall=true;
     }
 
-    if (positionX == 0) {
+    if (positionXAlgo == 0) {
         current_tile.leftWall=true;
     }
     //TODO make sure condition don't overide each other
-    if (positionX == 2) {
+    if (positionXAlgo == 2) {
         current_tile.rightWall=true;
     }
 
-    if (positionY == 0) {
+    if (positionYAlgo == 0) {
         current_tile.backWall=true;
     }
 }
@@ -161,7 +158,7 @@ void Logic() {
     ResetCurrentTile();
     //this loop is so that it repeats again and again until it advance
     while (true) {
-        bool WallInFront = TestFrontWall();
+        TestFrontWall();
         int nextMovement = GetNextMovement();
         //Turn left
         if (nextMovement == 0) {
@@ -183,16 +180,16 @@ void Logic() {
         if (nextMovement == 1) {
             AdvanceDistance(0.45f, 1.0f);
             if (facingDirection == 0) {
-                positionX--;
+                positionXAlgo--;
             }
             if (facingDirection == 1) {
-                positionY++;
+                positionYAlgo++;
             }
             if (facingDirection == 2) {
-                positionX++;
+                positionXAlgo++;
             }
             if (facingDirection == 3) {
-                positionY--;
+                positionYAlgo--;
             }
             return;
         }

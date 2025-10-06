@@ -40,7 +40,7 @@ void loop() {
 
 
 
-    if(positionY != 9) {
+    if(positionYAlgo != 9) {
         Logic();
     }
 }

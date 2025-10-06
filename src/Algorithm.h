@@ -6,20 +6,20 @@
 #define SESSION1MAZESOLVER_ALGORITHM_H
 
 ///Current position so we can find the tape. If x is 0, left wall is a tape. If x is 2, right wall is a tape
-int positionX = 1;
+extern int positionXAlgo;
 ///Current position on y. If y is 0, then back wall is a real wall. If y is odd, then left and right wall are tape
-int positionY = 0;
+extern int positionYAlgo;
 
 ///@brief 0 = Left, 1 = Straight, 2 = Right, 3 = Back
-int previousDirection;
-
-
-///@brief 0 = Left, 1 = Straight, 2 = Right, 3 = Back
-int facingDirection;
+extern int previousDirection;
 
 
 ///@brief 0 = Left, 1 = Straight, 2 = Right, 3 = Back
-int nextDirection;
+extern int facingDirection;
+
+
+///@brief 0 = Left, 1 = Straight, 2 = Right, 3 = Back
+extern int nextDirection;
 
 ///@authors Felix, Daniela
 ///@date 10/1/2025
