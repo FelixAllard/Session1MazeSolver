@@ -29,6 +29,8 @@ void setup() {
 void loop() {
     Serial.println("Hello World");
     PrintToString();
+    TurnLeft();
+    delay(1000);
 
     /*Serial.println("ran");
     Advance(1.0f);

@@ -28,5 +28,4 @@ void PrintToString() {
     Serial.println(lastRead-result);
     lastRead = result;
     delay(300);
-
 }

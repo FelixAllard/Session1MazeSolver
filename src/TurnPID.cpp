@@ -4,9 +4,18 @@
 
 #include "TurnPID.h"
 
+#include "LibRobus.h"
+#include "PID.h"
+
 #define TURN_KP 0.004f
 #define TURN_KI 0.0001f
 #define TURN_KD 0.0005f
+
+static inline float clampf(float v, float lo, float hi) {
+    if (v < lo) return lo;
+    if (v > hi) return hi;
+    return v;
+}
 
 void Turn90(bool turnRight = true) {
     // Initialize both PIDs (separate from forward PIDs)
@@ -62,4 +71,11 @@ void Turn90(bool turnRight = true) {
             break;
         }
     }
+
+}
+void TurnLeft() {
+    Turn90(false);
+}
+void TurnRight() {
+    Turn90(true);
 }
