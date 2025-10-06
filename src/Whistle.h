@@ -8,11 +8,12 @@
 #include <Arduino.h>
 const int pinIntensite_5HZ = A1 ;
 const int pinBruitAmbiant = A0 ;
-void SetupWhistle() ;
-float GetFrequence () ;
-bool Micro() ;
 
-bool Sifflet() ;
+void SetupWhistle() ;
+
+bool Avertissement();
+
+bool SiffletStart() ;
 
 void PrintToString();
 #endif //SESSION1MAZESOLVER_WHISTLE_H
