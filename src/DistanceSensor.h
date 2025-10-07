@@ -23,5 +23,6 @@ bool GetGreenSensor();
 ///@note If both have a wall = true, else false
 ///@author Felix
 bool GetBothSensor();
+void PrintToStringDetect();
 
 #endif //SESSION1MAZESOLVER_DISTANCESENSOR_H

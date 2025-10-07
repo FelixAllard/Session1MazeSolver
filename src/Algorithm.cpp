@@ -208,7 +208,7 @@ void Logic() {
                 }
                 break;
             case 1:
-                AdvanceDistance(0.47f, 1.0f);
+                AdvanceDistance(0.384f, 1.0f);
                 if (facingDirection == 0) {
                     positionXAlgo--;
                 }

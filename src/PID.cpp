@@ -152,11 +152,21 @@ void AdvanceDistance(float distanceMeters, float fractionSpeed) {
                 break;
         }
     }
+    const float decelStep = 0.12f;   // vitesse de réduction à chaque boucle
+    const int decelDelay = 80;       // temps entre les paliers (ms)
 
-    // Stop
+
+    for (float s = fractionSpeed; s > 0.0f; s -= decelStep) {
+        PID_ControlMotors(s);
+        delay(decelDelay);
+    }
+
     MOTOR_SetSpeed(0, 0.0f);
     MOTOR_SetSpeed(1, 0.0f);
+
 }
+
+
 
 
 
@@ -192,7 +202,7 @@ void PID_ControlMotors(float targetSpeed) {
     control1 += SYNC_KP_POS * positionError;
 
     // --- Static motor bias correction (hardware imbalance) ---
-    const float motorBias[2] = {1.00f, 1.017f}; // right motor needs ~4% more speed //TODO fight right ratio
+    const float motorBias[2] = {1.00f, 1.0037f}; // right motor needs ~4% more speed //TODO fight right ratio
     control0 *= motorBias[0];
     control1 *= motorBias[1];
 

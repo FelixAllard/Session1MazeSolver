@@ -11,6 +11,8 @@ int lastRead;
 int result =0;
 int count=0;
 unsigned long lastUpdate = 0;
+bool start =false;
+
 
 void SetupWhistle() {
     pinMode(pinBruitAmbiant, INPUT) ;
@@ -36,12 +38,14 @@ bool Avertissement() {
         return false;
     }
 
-    if (count % 6 == 0) {
-        for (int i = 0; i < 10; i++) {
-            Serial.println(i+1);
-            delay(1000);
-        }
-        return true;
+        if (count % 6 == 0) {
+            for (int i = 0; i < 10; i++) {
+                Serial.println(i+1);
+
+                delay(1000);
+            }
+
+            return true;
     }
 
     if (count % 3 == 0) {
@@ -55,8 +59,9 @@ bool Avertissement() {
 bool SiffletStart() {
     result = analogRead(pinBruitAmbiant) - analogRead(pinIntensite_5HZ);
 
-    if (result>150)
+    if (result>80)
     {
+        start = true;
       return true;
     }else{
         return false;

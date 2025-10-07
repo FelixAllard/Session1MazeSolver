@@ -8,6 +8,7 @@
 #include <Arduino.h>
 const int pinIntensite_5HZ = A1 ;
 const int pinBruitAmbiant = A0 ;
+extern bool start;
 
 void SetupWhistle() ;
 

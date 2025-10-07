@@ -27,10 +27,15 @@ bool GetBothSensor() {
     bool green = !digitalRead(greenPin);
 
     if (red || green) {
+
         return true;
+
     }
     else {
         return false;
     }
 
+}
+void PrintToStringDetect() {
+    Serial.println(GetBothSensor());
 }
