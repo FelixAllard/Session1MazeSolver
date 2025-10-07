@@ -157,15 +157,9 @@ int GetNextMovement() {
             return 1 ;
         }
     }
+    //TODO if in middle so x1, turn to face the the end AND MAKE SURE HE DOESN't go back. This is harder than just turn, you have to make sure
 
     return 1;
-    //TODO some condit
-    //If looking toward right and wall in front, turn to left
-
-    //If looking toward left and wall in front, turn to right
-
-    //If looking straight and wall in front, but wall neither left nor right, turn left ( or right, your choice )
-    // wall in front, left and right, turn to face backward (fastest way)
 
 }
 ///@authors Daniela, Felix
@@ -203,7 +197,7 @@ void Logic() {
                 }
                 break;
             case 1:
-                AdvanceDistance(0.30f, 1.0f);
+                AdvanceDistance(0.47f, 1.0f);
                 if (facingDirection == 0) {
                     positionXAlgo--;
                 }

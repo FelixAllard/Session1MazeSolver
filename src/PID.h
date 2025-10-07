@@ -13,7 +13,7 @@ const float PPR = 3200.0f;
 
 /// @brief Sample period (ms) for control loop
 /// @author Felix
-const float SampleMs = 50;
+const float SampleMs = 150;
 
 /// @brief Sample period (s) for control loop
 /// @author Felix
@@ -21,7 +21,7 @@ const float SampleS = SampleMs / 1000.0f;
 
 /// @brief Motor top speed (rotations per second, RPS)
 /// @author Felix
-const float maxRPS = 1.0f;
+const float maxRPS = 15.0f;
 
 /// @brief Last encoder readings (global for both motors)
 /// @author Felix

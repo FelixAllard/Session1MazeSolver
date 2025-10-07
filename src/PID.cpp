@@ -11,7 +11,7 @@
 //Honestly, just ask Felix if question
 
 #define SYNC_KP 0.05f
-#define SYNC_KP_POS 0.03f
+#define SYNC_KP_POS 0.02f
 
 
 
@@ -48,7 +48,8 @@ void Advance(float motorFraction) {
     motorFraction = clampf(motorFraction, 0.0f, 1.0f);
 
     // Initialize both PIDs
-    PIDS_Init(0.25f, 0.04f, 0.03f);
+    PIDS_Init(0.2f, 0.07f, 0.04f); // inside AdvanceDistance()
+
 
     // Reset integrals
     for (int i = 0; i < 2; i++) {
@@ -57,7 +58,7 @@ void Advance(float motorFraction) {
 
     float currentSpeedRef = 0.0f; // ramping variable
     unsigned long lastUpdate = 0;
-    const float accelStep = 0.02f; // fraction per loop
+    const float accelStep = 0.2f; // fraction per loop
 
     while (true) {
         unsigned long now = millis();
@@ -107,14 +108,14 @@ void Advance(float motorFraction) {
 
 // Updates both motors with PID + sync correction
 void AdvanceDistance(float distanceMeters, float fractionSpeed) {
-    // Clamp speed fraction
+    // Clamp target speed
     fractionSpeed = clampf(fractionSpeed, 0.0f, 1.0f);
 
     // Convert distance to encoder pulses
-    const float wheelRadius = 0.0385f; // meters
+    const float wheelRadius = 0.0385f;
     long targetPulses = (long)((distanceMeters / (2.0f * 3.14159f * wheelRadius)) * PPR);
 
-    // Reset encoders and PID state
+    // Reset encoders and PID
     ENCODER_Reset(0);
     ENCODER_Reset(1);
     lastCountEncoder[0] = 0;
@@ -122,56 +123,43 @@ void AdvanceDistance(float distanceMeters, float fractionSpeed) {
     totalCountEncoder[0] = 0;
     totalCountEncoder[1] = 0;
     ResetPIDState();
-    PIDS_Init(0.25f, 0.05f, 0.03f); // PID tuning
 
-    float currentSpeedRef = 0.0f;      // ramping variable
-    const float accelStep = 0.02f;     // fraction per loop
+    // Slightly smoother PID gains for direct control
+    PIDS_Init(0.30f, 0.03f, 0.03f);
+
     unsigned long lastUpdate = millis();
+    float currentSpeedRef = 0.0f;      // internal target used by PID
+    const float step = 0.1f;          // how fast we "snap" toward target (not full accel)
 
     while (true) {
         unsigned long now = millis();
         if (now - lastUpdate >= SampleMs) {
             lastUpdate = now;
 
-            // --- Ramp up gradually ---
+            // --- Gradually move target toward desired speed ---
             if (currentSpeedRef < fractionSpeed) {
-                currentSpeedRef += accelStep;
-                if (currentSpeedRef > fractionSpeed) currentSpeedRef = fractionSpeed;
+                currentSpeedRef += step;
+                if (currentSpeedRef > fractionSpeed)
+                    currentSpeedRef = fractionSpeed;
             }
 
-            // --- PID + sync control ---
+            // --- PID control ---
             PID_ControlMotors(currentSpeedRef);
 
             // --- Check distance ---
             long avgPulses = (totalCountEncoder[0] + totalCountEncoder[1]) / 2;
-            if (avgPulses >= targetPulses) break;
-        }
-    }
-
-    // --- Smooth stop ---
-    float decelSpeed = currentSpeedRef;
-    while (decelSpeed > 0.0f) {
-        unsigned long now = millis();
-        if (now - lastUpdate >= SampleMs) {
-            lastUpdate = now;
-            decelSpeed -= accelStep;           // ramp down
-            if (decelSpeed < 0.0f) decelSpeed = 0.0f;
-
-            if (decelSpeed > 0.0f) {
-                PID_ControlMotors(decelSpeed);
-            } else {
-                // Hard stop
-                MOTOR_SetSpeed(0, 0.0f);
-                MOTOR_SetSpeed(1, 0.0f);
+            if (avgPulses >= targetPulses)
                 break;
-            }
         }
     }
 
-
+    // Stop
     MOTOR_SetSpeed(0, 0.0f);
     MOTOR_SetSpeed(1, 0.0f);
 }
+
+
+
 void PID_ControlMotors(float targetSpeed) {
     float measured[2];
     long diff[2];
@@ -204,7 +192,7 @@ void PID_ControlMotors(float targetSpeed) {
     control1 += SYNC_KP_POS * positionError;
 
     // --- Static motor bias correction (hardware imbalance) ---
-    const float motorBias[2] = {1.00f, 1.025f}; // right motor needs ~4% more speed
+    const float motorBias[2] = {1.00f, 1.017f}; // right motor needs ~4% more speed //TODO fight right ratio
     control0 *= motorBias[0];
     control1 *= motorBias[1];
 
@@ -215,7 +203,6 @@ void PID_ControlMotors(float targetSpeed) {
     MOTOR_SetSpeed(0, control0);
     MOTOR_SetSpeed(1, control1);
 }
-
 
 // PID update function (with anti-windup clamp)
 float PID_Update(PID* Pid, float setpoint, float measured, float dt) {

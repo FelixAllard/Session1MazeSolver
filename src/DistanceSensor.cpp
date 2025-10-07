@@ -26,7 +26,7 @@ bool GetBothSensor() {
     bool red = !digitalRead(redPin);
     bool green = !digitalRead(greenPin);
 
-    if (red && green) {
+    if (red || green) {
         return true;
     }
     else {
