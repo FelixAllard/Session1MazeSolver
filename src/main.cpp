@@ -40,7 +40,7 @@ void loop() {
 
     //delay(2000);
 
-    if(positionYAlgo != 9) {
+    if(positionYAlgo != 10) {
         Logic();
     }
 }

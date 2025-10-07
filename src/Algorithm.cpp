@@ -15,6 +15,7 @@ int positionYAlgo = 0;
 int previousDirection = 0;
 int facingDirection = 1;
 int nextDirection = 0;
+int  defaultTurn = 0;
 
 
 CurrentTile current_tile;
@@ -79,7 +80,17 @@ bool TestFrontWall() {
 
 int GetNextMovement() {
     // priorité : avancer > gauche > droite > demi-tour
-
+    if (!current_tile.straightWall)
+    {
+        if (facingDirection == 2) {
+            defaultTurn = 2;
+            return 0 ;
+        }
+        if (facingDirection == 0) {
+            defaultTurn = 0;
+            return 2 ;
+        }
+    }
     // On verifie le mur devant soi
     if (!current_tile.straightWall) {
         if (facingDirection == 1) {
@@ -139,7 +150,7 @@ int GetNextMovement() {
     }
     if (current_tile.straightWall) {
         if (facingDirection == 1) {
-            return 0 ;
+            return defaultTurn ; //ajoute par theo
         }
     }
     if (current_tile.leftWall) {
