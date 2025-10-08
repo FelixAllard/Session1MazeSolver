@@ -7,6 +7,7 @@
 #include "Algorithm.h"
 
 #include "DistanceSensor.h"
+#include "TurnPID.h"
 //MOTOR de gauche = 0
 //MOTOR de droite = 1
 
@@ -41,13 +42,17 @@ void loop() {
     //AdvanceDistance(0.45f, 1.0f);
 
     //delay(2000);
-    PrintToString();
+PrintToString();
     PrintToStringDetect();
 
-    if(positionYAlgo != 10 && start == true) {
+    if(
+    positionYAlgo != 10
+    //    && start == true
+    ) {
         Logic();
     } else {
         Serial.println("En attente du signal");
         delay(500);
     }
+
 }
