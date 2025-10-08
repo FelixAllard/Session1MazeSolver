@@ -5,11 +5,10 @@
 #include "MotorBias.h"
 
 
-#define ENCODER_PPR 3200.0f
+#define ENCODER_PPR 3250.0f
 #define WHEEL_DIAMETER 7.7f   // cm
 #define WHEELBASE 18.0f       // cm
-#define TURN_SPEED 0.30f      // constant turning speed
-#define STOP_DELAY 50         // ms delay after stop
+#define TURN_SPEED 0.20f      // constant turning speed
 
 
 static inline float clampf(float v, float lo, float hi) {
@@ -47,7 +46,7 @@ void Turn90(bool turnRight = true) {
         if (avgDist >= pulsesTarget) {
             MOTOR_SetSpeed(0, 0.0f);
             MOTOR_SetSpeed(1, 0.0f);
-            delay(STOP_DELAY);
+
             break;
         }
     }

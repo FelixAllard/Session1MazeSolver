@@ -11,8 +11,8 @@
 
 //Honestly, just ask Felix if question
 
-#define SYNC_KP 0.05f
-#define SYNC_KP_POS 0.02f
+#define SYNC_KP 0.10f
+#define SYNC_KP_POS 0.05f
 
 
 
@@ -43,7 +43,7 @@ void ResetPIDState() {
         motorPID[i].lastDerivative = 0.0f;
     }
 }
-
+///@deprecated Use the other advance
 void Advance(float motorFraction) {
     // motorFraction is now 0–1 (0 = stopped, 1 = full speed)
     motorFraction = clampf(motorFraction, 0.0f, 1.0f);
@@ -59,7 +59,7 @@ void Advance(float motorFraction) {
 
     float currentSpeedRef = 0.0f; // ramping variable
     unsigned long lastUpdate = 0;
-    const float accelStep = 0.2f; // fraction per loop
+    const float accelStep = 0.4f; // fraction per loop
 
     while (true) {
         unsigned long now = millis();
@@ -110,7 +110,7 @@ void Advance(float motorFraction) {
 // Updates both motors with PID + sync correction
 void AdvanceDistance(float distanceMeters, float fractionSpeed) {
     // Clamp target speed
-    fractionSpeed = clampf(fractionSpeed, 0.0f, 1.0f);
+    fractionSpeed = clampf(fractionSpeed, 0.0f, 2.2f);
 
     // Convert distance to encoder pulses
     const float wheelRadius = 0.0385f;
@@ -126,11 +126,11 @@ void AdvanceDistance(float distanceMeters, float fractionSpeed) {
     ResetPIDState();
 
     // Slightly smoother PID gains for direct control
-    PIDS_Init(0.30f, 0.03f, 0.03f);
+    PIDS_Init(0.63f, 0.07f, 0.05f);
 
     unsigned long lastUpdate = millis();
     float currentSpeedRef = 0.0f;      // internal target used by PID
-    const float step = 0.1f;          // how fast we "snap" toward target (not full accel)
+    const float step = 0.25f;          // how fast we "snap" toward target (not full accel)
 
     while (true) {
         unsigned long now = millis();
@@ -153,8 +153,8 @@ void AdvanceDistance(float distanceMeters, float fractionSpeed) {
                 break;
         }
     }
-    const float decelStep = 0.12f;   // vitesse de réduction à chaque boucle
-    const int decelDelay = 80;       // temps entre les paliers (ms)
+    const float decelStep = 0.20f;   // vitesse de réduction à chaque boucle
+    const int decelDelay = 35;       // temps entre les paliers (ms)
 
 
     for (float s = fractionSpeed; s > 0.0f; s -= decelStep) {

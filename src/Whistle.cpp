@@ -10,6 +10,7 @@
 int lastRead;
 int result =0;
 int count=0;
+int count5Hz =0;
 unsigned long lastUpdate = 0;
 bool start =false;
 
