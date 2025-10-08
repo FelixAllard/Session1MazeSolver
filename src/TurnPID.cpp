@@ -2,6 +2,7 @@
 #include "TurnPID.h"
 #include "LibRobus.h"
 #include "PID.h"
+#include "MotorBias.h"
 
 
 #define ENCODER_PPR 3200.0f
@@ -10,9 +11,6 @@
 #define TURN_SPEED 0.30f      // constant turning speed
 #define STOP_DELAY 50         // ms delay after stop
 
-// Slight bias to correct motor imbalance
-#define LEFT_MOTOR_BIAS 0.97f   // reduce if left pushes harder
-#define RIGHT_MOTOR_BIAS 1.00f  // keep right as reference
 
 static inline float clampf(float v, float lo, float hi) {
     if (v < lo) return lo;
@@ -39,8 +37,8 @@ void Turn90(bool turnRight = true) {
         float avgDist = (fabs(leftCount) + fabs(rightCount)) / 2.0f;
 
         // Apply constant speed with small bias correction
-        float leftSpeed  = (turnRight ?  TURN_SPEED : -TURN_SPEED) * LEFT_MOTOR_BIAS;
-        float rightSpeed = (turnRight ? -TURN_SPEED :  TURN_SPEED) * RIGHT_MOTOR_BIAS;
+        float leftSpeed  = (turnRight ?  TURN_SPEED : -TURN_SPEED) * motorBias_Base[0];
+        float rightSpeed = (turnRight ? -TURN_SPEED :  TURN_SPEED) * motorBias_Base[1];
 
         MOTOR_SetSpeed(0, leftSpeed);
         MOTOR_SetSpeed(1, rightSpeed);

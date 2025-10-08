@@ -6,6 +6,7 @@
 #include "PID.h"
 #include <Arduino.h>
 #include <LibRobus.h>
+#include "MotorBias.h"
 
 
 //Honestly, just ask Felix if question
@@ -201,10 +202,8 @@ void PID_ControlMotors(float targetSpeed) {
     float positionError = (totalCountEncoder[0] - totalCountEncoder[1]) / PPR; // distance diff
     control1 += SYNC_KP_POS * positionError;
 
-    // --- Static motor bias correction (hardware imbalance) ---
-    const float motorBias[2] = {1.00f, 1.0037f}; // right motor needs ~4% more speed //TODO fight right ratio
-    control0 *= motorBias[0];
-    control1 *= motorBias[1];
+    control0 *= motorBias_Base[0];
+    control1 *= motorBias_Base[1];
 
     // --- Clamp and send to motors ---
     control0 = clampf(control0, 0.0f, 1.0f);
