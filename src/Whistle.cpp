@@ -20,8 +20,7 @@ void SetupWhistle() {
     pinMode(pinIntensite_5HZ, INPUT) ;
 }
 
-float GetFrequence() {
-}
+
 
 bool Avertissement() {
 
@@ -33,7 +32,7 @@ bool Avertissement() {
 
     result = analogRead(pinBruitAmbiant) - analogRead(pinIntensite_5HZ);
 
-    if (result < -38) {
+    if (result < -28) {
         count++;
     } else {
         return false;
@@ -60,7 +59,7 @@ bool Avertissement() {
 bool SiffletStart() {
     result = analogRead(pinBruitAmbiant) - analogRead(pinIntensite_5HZ);
 
-    if (result>80)
+    if (result>70)
     {
         start = true;
       return true;
@@ -78,7 +77,6 @@ void PrintToString() {
 
 
    Serial.println(result);
-
     Serial.println(SiffletStart());
 
 

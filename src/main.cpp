@@ -47,13 +47,13 @@ void loop() {
     //AdvanceDistance(0.45f, 1.0f);
 
     //delay(2000);
-    //PrintToString();
+    PrintToString();
 
-    PrintToStringDetect();
+    //PrintToStringDetect();
 
     if(
     positionYAlgo != 10
-    //    && start == true
+      && start == true
     ) {
         Logic();
     } else {

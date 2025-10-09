@@ -31,22 +31,17 @@ void ResetCurrentTile() {
 // 4 5 6
 void CheckIfTape(){
 
-    if (x=1) {
-        if (y=4) {
+    if (positionXAlgo==1) {
+        if (positionYAlgo==8) {
             current_tile.backWall=true;
         }
-        else if (y=5) {
-            //NOTHING
-        }
-        else if (y=6) {
-            current_tile.straightWall=true;
+        else if (positionYAlgo==9) {
         }
         else {
             current_tile.straightWall=true;
             current_tile.backWall=true;
         }
     }
-
     if (positionYAlgo %2 != 0) {
         current_tile.leftWall=true;
         current_tile.rightWall=true;
@@ -205,7 +200,7 @@ void Logic() {
         Serial.print(test);
         Serial.println(nextMovement);
         //Turn left
-
+        delay(250);
         switch (nextMovement) {
             case 0:
                 TurnLeft();
@@ -224,7 +219,7 @@ void Logic() {
                 }
                 break;
             case 1:
-                AdvanceDistance(0.355f, 1.0f);
+                AdvanceDistance(0.34425f, 1.0f);
                 if (facingDirection == 0) {
                     positionXAlgo--;
                 }

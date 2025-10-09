@@ -153,7 +153,7 @@ void AdvanceDistance(float distanceMeters, float fractionSpeed) {
                 break;
         }
     }
-    const float decelStep = 0.15f;   // vitesse de réduction à chaque boucle
+    const float decelStep = 0.10f;   // vitesse de réduction à chaque boucle
     const int decelDelay = 35;       // temps entre les paliers (ms)
 
 
