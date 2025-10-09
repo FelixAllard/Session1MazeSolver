@@ -6,15 +6,15 @@
 
 
 //1 = white board , 2 = transparent board
-const int ROBOT_NUMBER = 1;
+const int ROBOT_NUMBER = 2;
 
 float motorBias_Base[2] = {1.0f, 1.0f};  // default
 
 void SetMotorBias() {
     if (ROBOT_NUMBER ==1) {
-    motorBias_Base[1] = 1.01485f;
+    motorBias_Base[1] = 1.005f;
     }
     else if (ROBOT_NUMBER == 2) {
-        motorBias_Base[1] = 1.0315f;
+        motorBias_Base[1] = 1.0350f;
     }
 }

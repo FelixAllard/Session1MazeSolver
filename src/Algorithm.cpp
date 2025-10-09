@@ -15,7 +15,7 @@ int positionYAlgo = 0;
 int previousDirection = 0;
 int facingDirection = 1;
 int nextDirection = 0;
-int  defaultTurn = 0;
+int defaultTurn = 0;
 
 
 CurrentTile current_tile;
