@@ -15,7 +15,7 @@ int positionYAlgo = 0;
 int previousDirection = 0;
 int facingDirection = 1;
 int nextDirection = 0;
-int  defaultTurn = 0;
+int defaultTurn = 0;
 
 float const oneTileDistance = 0.37;
 
@@ -30,13 +30,29 @@ void ResetCurrentTile() {
     CheckIfTape();
 }
 
-
+// 4 5 6
 void CheckIfTape(){
+
+    if (x=1) {
+        if (y=4) {
+            current_tile.backWall=true;
+        }
+        else if (y=5) {
+            //NOTHING
+        }
+        else if (y=6) {
+            current_tile.straightWall=true;
+        }
+        else {
+            current_tile.straightWall=true;
+            current_tile.backWall=true;
+        }
+    }
+
     if (positionYAlgo %2 != 0) {
         current_tile.leftWall=true;
         current_tile.rightWall=true;
     }
-
     if (positionXAlgo == 0) {
         current_tile.leftWall=true;
     }
