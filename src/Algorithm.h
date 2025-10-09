@@ -21,6 +21,7 @@ extern int facingDirection;
 ///@brief 0 = Left, 1 = Straight, 2 = Right, 3 = Back
 extern int nextDirection;
 
+extern const float oneTileDistance;
 ///@authors Felix, Daniela
 ///@date 10/1/2025
 struct CurrentTile {
@@ -56,6 +57,13 @@ bool TestFrontWall();
 ///@brief APPLICATION Logic, everything goes through this
 ///@authors Felix, Daniela, Eva
 void Logic();
+
+
+
+///@brief This function is to come back after
+///@author Felix
+///@cond Ending the maze
+void RunBackLogic();
 
 
 #endif //SESSION1MAZESOLVER_ALGORITHM_H

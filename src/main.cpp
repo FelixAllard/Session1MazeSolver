@@ -47,18 +47,23 @@ void loop() {
     //AdvanceDistance(0.45f, 1.0f);
 
     //delay(2000);
-    PrintToString();
+    //PrintToString();
 
-    //PrintToStringDetect();
+    PrintToStringDetect();
 
-    if(
-    positionYAlgo != 10
-      && start == true
-    ) {
-        Logic();
-    } else {
+    if (start) {
+        if (positionYAlgo!=10) {
+            Logic();
+        }
+        else {
+            RunBackLogic();
+
+        }
+    }
+    else {
         Serial.println("En attente du signal");
         delay(500);
     }
+
 
 }
