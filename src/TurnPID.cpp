@@ -5,7 +5,7 @@
 #include "MotorBias.h"
 
 
-#define ENCODER_PPR 3300.0f
+#define ENCODER_PPR 3250.0f
 #define WHEEL_DIAMETER 7.7f   // cm
 #define WHEELBASE 18.0f       // cm
 #define TURN_SPEED 0.20f      // constant turning speed
