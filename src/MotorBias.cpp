@@ -12,7 +12,7 @@ float motorBias_Base[2] = {1.0f, 1.0f};  // default
 
 void SetMotorBias() {
     if (ROBOT_NUMBER ==1) {
-    motorBias_Base[1] = 1.0135f;
+    motorBias_Base[1] = 1.0161;
     }
     else if (ROBOT_NUMBER == 2) {
         motorBias_Base[1] = 1.0350f;

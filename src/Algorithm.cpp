@@ -17,7 +17,7 @@ int facingDirection = 1;
 int nextDirection = 0;
 int defaultTurn = 0;
 
-float const oneTileDistance = 0.37;
+float const oneTileDistance = 0.315;//425f;
 
 
 CurrentTile current_tile;
@@ -271,7 +271,7 @@ void RunBackLogic() {
         }
     }
 
-    AdvanceDistance(oneTileDistance*9,1.0f);
+    AdvanceDistance(oneTileDistance*50,1.0f);
     returned = true;
 
 }

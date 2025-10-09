@@ -22,6 +22,7 @@ void SetupWhistle() {
 
 
 
+/*
 bool Avertissement() {
 
     if (millis() - lastUpdate < 1000) {
@@ -55,6 +56,7 @@ bool Avertissement() {
 
     return false;
 }
+*/
 
 bool SiffletStart() {
     result = analogRead(pinBruitAmbiant) - analogRead(pinIntensite_5HZ);
@@ -79,9 +81,4 @@ void PrintToString() {
    Serial.println(result);
     Serial.println(SiffletStart());
 
-
-    if (Avertissement()) {
-        Serial.println("Un Avertissement 1 kHz détecté");
-    }
-    delay(300);
 }

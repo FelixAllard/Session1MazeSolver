@@ -12,7 +12,6 @@ extern bool start;
 
 void SetupWhistle() ;
 
-bool Avertissement();
 
 bool SiffletStart() ;
 

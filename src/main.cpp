@@ -1,13 +1,11 @@
 #include <Arduino.h>
 #include <LibRobus.h>
-#include <DistanceSensor.h>
 #include "main.h"
 #include "Whistle.h"
 #include "Algorithm.h"
 #include "MotorBias.h"
 
 #include "DistanceSensor.h"
-#include "TurnPID.h"
 //MOTOR de gauche = 0
 //MOTOR de droite = 1
 
@@ -29,27 +27,10 @@ void setup() {
     //Reset both encoders because they are not necessarily reset
     ENCODER_Reset(0);
     ENCODER_Reset(1);
-
-
-
 }
 ///@brief This function simply runs over and over in the runtime. it is called by the Arduino
 ///@author Felix
 void loop() {
-    //Serial.println("Hello World");
-    /*PrintToString();
-    TurnLeft();*/
-    //AdvanceDistance(0.45f, 1.0f);
-    /*Serial.println("ran");
-    Advance(1.0f);
-    delay(2000);*/
-
-    //AdvanceDistance(0.45f, 1.0f);
-
-    //delay(2000);
-    //PrintToString();
-
-    PrintToStringDetect();
 
     if (start) {
         if (positionYAlgo!=10) {
@@ -57,13 +38,11 @@ void loop() {
         }
         else {
             RunBackLogic();
-
         }
     }
     else {
+        SiffletStart();
         Serial.println("En attente du signal");
         delay(500);
     }
-
-
 }
