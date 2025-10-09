@@ -17,6 +17,8 @@ int facingDirection = 1;
 int nextDirection = 0;
 int  defaultTurn = 0;
 
+float const oneTileDistance = 0.37;
+
 
 CurrentTile current_tile;
 
@@ -208,7 +210,7 @@ void Logic() {
                 }
                 break;
             case 1:
-                AdvanceDistance(0.355f, 1.0f);
+                AdvanceDistance(oneTileDistance, 1.0f);
                 if (facingDirection == 0) {
                     positionXAlgo--;
                 }
@@ -231,4 +233,34 @@ void Logic() {
                 return;
         }
     }
+}
+bool returned = false;
+void RunBackLogic() {
+    if (returned) {
+        return;
+    }
+    if (positionXAlgo == 0 && facingDirection==1) {
+        TurnRight();
+        delay(500);
+        AdvanceDistance(oneTileDistance);
+        delay(500);
+        TurnRight();
+    }
+    else if (positionXAlgo == 2 && facingDirection==1) {
+        TurnLeft();
+        delay(500);
+        AdvanceDistance(oneTileDistance);
+        delay(500);
+        TurnLeft();
+
+    }
+    else if (positionXAlgo == 1) {
+        for (int i = 0; i < 2; ++i) {
+            TurnRight();
+        }
+    }
+
+    AdvanceDistance(oneTileDistance*9,1.0f);
+    returned = true;
+
 }

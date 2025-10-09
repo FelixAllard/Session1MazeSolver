@@ -51,14 +51,19 @@ void loop() {
 
     PrintToStringDetect();
 
-    if(
-    positionYAlgo != 10
-    //    && start == true
-    ) {
-        Logic();
-    } else {
+    if (start) {
+        if (positionYAlgo!=10) {
+            Logic();
+        }
+        else {
+            RunBackLogic();
+
+        }
+    }
+    else {
         Serial.println("En attente du signal");
         delay(500);
     }
+
 
 }
