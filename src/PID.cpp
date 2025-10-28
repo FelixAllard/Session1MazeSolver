@@ -43,67 +43,6 @@ void ResetPIDState() {
         motorPID[i].lastDerivative = 0.0f;
     }
 }
-///@deprecated Use the other advance
-void Advance(float motorFraction) {
-    // motorFraction is now 0–1 (0 = stopped, 1 = full speed)
-    motorFraction = clampf(motorFraction, 0.0f, 1.0f);
-
-    // Initialize both PIDs
-    PIDS_Init(0.2f, 0.07f, 0.04f); // inside AdvanceDistance()
-
-
-    // Reset integrals
-    for (int i = 0; i < 2; i++) {
-        motorPID[i].integral = 0.0f;
-    }
-
-    float currentSpeedRef = 0.0f; // ramping variable
-    unsigned long lastUpdate = 0;
-    const float accelStep = 0.4f; // fraction per loop
-
-    while (true) {
-        unsigned long now = millis();
-        if (now - lastUpdate >= SampleMs) {
-
-            // --- Ramp up / down ---
-            if (rampUp) {
-                currentSpeedRef += accelStep;
-                if (currentSpeedRef >= motorFraction) {
-                    currentSpeedRef = motorFraction;
-                    rampUp = false; // start deceleration next
-                }
-            } else {
-                currentSpeedRef -= accelStep;
-                if (currentSpeedRef <= 0.0f) {
-                    currentSpeedRef = 0.0f;
-                    rampUp = true;
-
-                    // Smooth PID damping
-                    for (int i = 0; i < 2; i++) {
-                        motorPID[i].integral *= 0.5f;
-                        motorPID[i].lastError *= 0.5f;
-                        motorPID[i].lastDerivative = 0.0f;
-                    }
-
-                    MOTOR_SetSpeed(0, 0.0f);
-                    MOTOR_SetSpeed(1, 0.0f);
-                    Serial.println("Reached Acceleration End");
-                    break;
-                }
-            }
-
-            lastUpdate = now;
-
-            // --- Update motors with fraction directly ---
-            PID_ControlMotors(currentSpeedRef);
-        }
-    }
-}
-
-// Moves the robot a specific distance in meters
-// fractionSpeed: 0.0–1.0 (normalized motor speed fraction)
-
-
 
 
 
